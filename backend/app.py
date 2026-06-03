@@ -49,12 +49,13 @@ from k1_handler      import robot
 from tts             import synthesize, cleanup
 from stt             import transcribe_text
 from session_manager import session_store
+from camera          import camera_stream, camera_handler
 
 # ── App setup ─────────────────────────────────────────────────────────────────
 
 app = Flask(
     __name__,
-    static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend"),
+    static_folder=os.path.join(os.path.dirname(__file__), "..", "frontend"),
 )
 app.secret_key = cfg.FLASK_SECRET_KEY
 CORS(app, supports_credentials=True)
@@ -82,6 +83,16 @@ _admin_pw_hash = bcrypt.hashpw(
 
 # Connect to K1 at startup
 robot.connect()
+
+# Start camera handler (requires ROS2 on Linux — degrades gracefully)
+camera_handler.start()
+
+# Start Isaac Sim bridge (requires ROS 2 — degrades gracefully if absent)
+try:
+    from isaac_bridge import isaac_bridge
+    isaac_bridge.start()
+except Exception as e:
+    print(f"[Isaac bridge] Not started: {e}")
 
 # ── Static: serve dashboard ───────────────────────────────────────────────────
 
@@ -200,6 +211,26 @@ def _dispatch_action(action: str) -> None:
         robot.gesture(action)
     else:
         print(f"[action] Unknown action tag: {action}")
+
+
+@app.route("/api/camera/stream")
+def camera_feed():
+    """
+    MJPEG stream from K1 ZED camera.
+    Dashboard displays via: <img src="/api/camera/stream">
+    Falls back to offline placeholder when camera unavailable.
+    """
+    from flask import Response
+    return Response(
+        camera_stream(),
+        mimetype='multipart/x-mixed-replace; boundary=frame'
+    )
+
+
+@app.route("/api/camera/status")
+def camera_status():
+    """Returns whether a live camera frame is available."""
+    return jsonify({"live": camera_handler.has_frame})
 
 
 # ── Robot movement ────────────────────────────────────────────────────────────
