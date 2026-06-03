@@ -1,0 +1,40 @@
+# K1 Wizard-of-Oz Dashboard — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Web server ────────────────────────────────────────────────
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# ── Environment config ────────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ── Security ──────────────────────────────────────────────────
+bcrypt>=4.1.0
+
+# ── Whisper STT ───────────────────────────────────────────────
+openai-whisper>=20231117
+# ffmpeg must be installed separately — see docs/SETUP.md
+
+# ── Piper TTS ─────────────────────────────────────────────────
+piper-tts>=1.2.0
+
+# ── LLM providers ────────────────────────────────────────────
+# Ollama runs as a local service — no pip package needed
+# Client library for convenience:
+ollama>=0.1.8
+
+# Anthropic (used only when provider=anthropic)
+anthropic>=0.25.0
+
+# OpenAI (used only when provider=openai)
+openai>=1.12.0
+
+# ── Booster K1 SDK ────────────────────────────────────────────
+booster_robotics_sdk_python>=1.3.6
+
+# ── Audio utilities ───────────────────────────────────────────
+soundfile>=0.12.1
+numpy>=1.24.0
+
+# ── Utilities ─────────────────────────────────────────────────
+requests>=2.31.0

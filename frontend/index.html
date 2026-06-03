@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K1 Control Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Lora:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Lora','Georgia',serif;
+      background: #fafaf8;
+      color: #2c2c2c;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page {
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0.9rem 1.5rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* ── HEADER ──────────────────────────────────────── */
+    header {
+      flex-shrink: 0;
+      border-bottom: 3px solid #2c2c2c;
+      padding-bottom: 0.6rem;
+      margin-bottom: 0.9rem;
+    }
+    .hd-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+    }
+    .masthead {
+      font-family: 'Crimson Text',serif;
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    .tagline {
+      font-size: 11px;
+      color: #999;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .hd-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #666;
+    }
+    .status-group { display:flex; align-items:center; gap:14px; }
+    .status-dot-wrap { display:flex; align-items:center; gap:6px; }
+    .dot { width:7px; height:7px; border-radius:50%; background:#4caf50; flex-shrink:0; }
+    .ip-tag {
+      font-family: 'Inter',sans-serif;
+      font-size: 11px;
+      background: #f0f0ee;
+      border: 1px solid #d8d8d5;
+      padding: 2px 8px;
+      color: #555;
+      letter-spacing: 0.3px;
+    }
+    .booster-link {
+      color: #2c5aa0;
+      text-decoration: none;
+      border-bottom: 1px solid #2c5aa0;
+      font-size: 12px;
+      transition: color .2s;
+    }
+    .booster-link:hover { color: #1a3a5c; }
+
+    /* ── 3-COLUMN GRID ───────────────────────────────── */
+    main {
+      display: grid;
+      grid-template-columns: 255px 1fr 310px;
+      gap: 1.1rem;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 0.6rem;
+    }
+
+    .col {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .col-title {
+      font-family: 'Crimson Text',serif;
+      font-size: 16px;
+      font-weight: 600;
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.65rem;
+      border-bottom: 2px solid #e0e0e0;
+      flex-shrink: 0;
+    }
+
+    /* ── UTILITY ─────────────────────────────────────── */
+    .lbl {
+      font-family: 'Inter',sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #2c2c2c;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .sep { border:none; border-top:1px solid #e8e8e5; margin:0.6rem 0; }
+
+    /* ── BUTTONS ─────────────────────────────────────── */
+    button {
+      font-family: 'Inter',sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border: 1px solid #2c2c2c;
+      background: transparent;
+      color: #2c2c2c;
+      cursor: pointer;
+      padding: 7px 10px;
+      transition: background .15s, color .15s;
+      flex: 1;
+    }
+    button:hover { background:#2c2c2c; color:#fafaf8; }
+    button.sec { border-color:#aaa; color:#666; }
+    button.sec:hover { background:#666; color:#fafaf8; }
+    button.green { border-color:#3a8a3a; color:#3a8a3a; }
+    button.green:hover { background:#3a8a3a; color:#fff; }
+    button.active-dark { background:#2c2c2c; color:#fafaf8; }
+    button.active-green { background:#3a8a3a; color:#fff; border-color:#3a8a3a; }
+
+    /* ── INPUTS / SELECTS ────────────────────────────── */
+    select, textarea, input[type="text"], input[type="password"] {
+      font-family: 'Lora',serif;
+      font-size: 12px;
+      border: 1px solid #d0d0d0;
+      background: #fff;
+      color: #2c2c2c;
+      padding: 7px 10px;
+      width: 100%;
+      outline: none;
+    }
+    select:focus, textarea:focus,
+    input[type="text"]:focus, input[type="password"]:focus { border-color:#2c2c2c; }
+    select { -webkit-appearance:none; appearance:none; cursor:pointer; }
+
+    /* ── SLIDERS ─────────────────────────────────────── */
+    .sl-row { display:flex; align-items:center; gap:8px; }
+    input[type="range"] {
+      flex:1; height:2px; background:#d8d8d5;
+      -webkit-appearance:none; appearance:none; outline:none; border-radius:0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance:none; width:13px; height:13px;
+      border-radius:50%; background:#2c2c2c; cursor:pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width:13px; height:13px; border-radius:50%;
+      background:#2c2c2c; cursor:pointer; border:none;
+    }
+    .sl-val {
+      font-family:'Inter',sans-serif;
+      font-size:10px; font-weight:600;
+      min-width:38px; text-align:right; color:#555;
+    }
+
+    /* ── LEFT: MOVEMENT ──────────────────────────────── */
+    .left-scroll { overflow-y:auto; flex:1; padding-right:3px; }
+
+    .move-pad {
+      display: grid;
+      grid-template-columns: repeat(3,44px);
+      grid-template-rows: repeat(3,auto);
+      gap: 4px;
+      justify-content: center;
+      margin-top: 4px;
+    }
+    .mc { text-align:center; }
+    .mb {
+      width:44px; height:36px; flex:none;
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px;
+    }
+    .ml {
+      font-family:'Inter',sans-serif;
+      font-size:8px; font-weight:600; color:#888;
+      text-transform:uppercase; letter-spacing:.2px;
+      margin-top:2px; line-height:1.1;
+    }
+
+    /* ── LEFT: GESTURES ──────────────────────────────── */
+    .gest-grid {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:6px; margin-top:4px;
+    }
+    .gb {
+      display:flex; flex-direction:column;
+      align-items:center; gap:4px;
+      padding:7px 4px;
+      border:1px solid #c8c8c5;
+      background:#fff; cursor:pointer;
+      transition:background .15s, border-color .15s;
+      flex:none;
+    }
+    .gb:hover { background:#f0f0ee; border-color:#2c2c2c; }
+    .gb span {
+      font-family:'Inter',sans-serif;
+      font-size:9px; font-weight:600;
+      text-transform:uppercase; letter-spacing:.3px; color:#555;
+    }
+
+    /* ── MIDDLE: CONVERSATION PANE ───────────────────── */
+    .conv-panel {
+      display:flex; flex-direction:column;
+      flex:1; min-height:0;
+      border:1px solid #d8d8d5;
+      background:#fff;
+    }
+
+    /* LLM selector bar */
+    .llm-bar {
+      flex-shrink:0;
+      padding:0.55rem 0.75rem 0;
+      border-bottom:1px solid #e8e8e5;
+    }
+    .llm-pills {
+      display:flex; gap:0; margin-bottom:0.5rem;
+    }
+    .llm-pill {
+      flex:1; padding:6px 4px;
+      font-family:'Inter',sans-serif;
+      font-size:10px; font-weight:600;
+      text-transform:uppercase; letter-spacing:.4px;
+      border:1px solid #d0d0d0;
+      background:transparent; color:#888;
+      cursor:pointer; transition:all .15s;
+    }
+    .llm-pill:not(:last-child) { border-right:none; }
+    .llm-pill:hover { background:#f0f0ee; color:#2c2c2c; }
+    .llm-pill.active { background:#2c2c2c; color:#fafaf8; border-color:#2c2c2c; z-index:1; }
+
+    .api-key-row {
+      display:flex; gap:6px;
+      margin-bottom:0.5rem;
+      align-items:center;
+    }
+    .api-key-row input {
+      flex:1; font-family:'Inter',sans-serif;
+      font-size:11px; padding:5px 8px;
+    }
+    .api-key-row button {
+      flex:none; padding:5px 10px;
+      font-size:10px;
+    }
+    .session-note {
+      font-family:'Inter',sans-serif;
+      font-size:9px; color:#aaa;
+      margin-bottom:0.4rem; letter-spacing:.2px;
+    }
+
+    /* chat messages */
+    .chat-history {
+      flex:1; overflow-y:auto;
+      padding:0.7rem 0.75rem;
+      display:flex; flex-direction:column; gap:0.65rem;
+    }
+    .cm { display:flex; flex-direction:column; gap:2px; }
+    .cm .who {
+      font-family:'Inter',sans-serif;
+      font-size:9px; font-weight:600;
+      text-transform:uppercase; letter-spacing:.4px; color:#aaa;
+    }
+    .cm.user .who { color:#2c5aa0; }
+    .cm.robot .who { color:#3a6e3a; }
+    .cm .bub {
+      font-size:12px; line-height:1.5; color:#2c2c2c;
+      padding:7px 10px;
+    }
+    .cm.user .bub { background:#f0f4fb; }
+    .cm.robot .bub { background:#f3f7f3; font-style:italic; }
+
+    .chat-sep { border:none; border-top:1px solid #e8e8e5; flex-shrink:0; }
+    .chat-foot {
+      flex-shrink:0; padding:0.65rem 0.75rem;
+      display:flex; flex-direction:column; gap:6px;
+    }
+    textarea.msg-in {
+      resize:none; min-height:52px; max-height:80px;
+      font-size:13px; line-height:1.4;
+    }
+    .chat-btns { display:flex; gap:7px; }
+
+    /* ── RIGHT: LIVE PANE ────────────────────────────── */
+
+    /* Real / Isaac toggle */
+    .view-toggle {
+      display:flex; gap:0; margin-bottom:0.65rem; flex-shrink:0;
+    }
+    .vt-btn {
+      flex:1; padding:7px 6px;
+      font-family:'Inter',sans-serif;
+      font-size:10px; font-weight:600;
+      text-transform:uppercase; letter-spacing:.4px;
+      border:1px solid #d0d0d0;
+      background:transparent; color:#888;
+      cursor:pointer; transition:all .15s;
+    }
+    .vt-btn:first-child { border-right:none; }
+    .vt-btn:hover { background:#f0f0ee; color:#2c2c2c; }
+    .vt-btn.active { background:#2c2c2c; color:#fafaf8; border-color:#2c2c2c; }
+
+    /* camera / sim viewport */
+    .view-port {
+      border:1px solid #d0d0d0;
+      background:#111;
+      position:relative;
+      flex-shrink:0;
+      aspect-ratio:4/3;
+      overflow:hidden;
+    }
+    .cam-placeholder {
+      position:absolute; inset:0;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:8px;
+    }
+    .cam-placeholder span {
+      font-family:'Inter',sans-serif;
+      font-size:11px; color:#888;
+      letter-spacing:.5px; text-transform:uppercase;
+    }
+    .isaac-placeholder {
+      position:absolute; inset:0;
+      display:none;
+      flex-direction:column;
+      align-items:center; justify-content:center; gap:10px;
+      padding:1.2rem;
+    }
+    .isaac-placeholder.visible { display:flex; }
+    .isaac-logo {
+      font-family:'Inter',sans-serif;
+      font-size:13px; font-weight:600;
+      color:#76b900; letter-spacing:1px;
+      text-transform:uppercase;
+    }
+    .isaac-info {
+      font-family:'Inter',sans-serif;
+      font-size:10px; color:#666;
+      text-align:center; line-height:1.5;
+    }
+    .isaac-url {
+      font-family:'Inter',sans-serif;
+      font-size:10px; color:#999;
+      background:#1e1e1e;
+      padding:4px 10px;
+      letter-spacing:.3px;
+    }
+    .isaac-connect {
+      padding:7px 18px;
+      font-family:'Inter',sans-serif;
+      font-size:10px; font-weight:600;
+      text-transform:uppercase; letter-spacing:.5px;
+      border:1px solid #76b900;
+      background:transparent; color:#76b900;
+      cursor:pointer; transition:all .15s; flex:none;
+    }
+    .isaac-connect:hover { background:#76b900; color:#111; }
+
+    /* robot status strip */
+    .status-strip {
+      flex:1; min-height:0;
+      display:flex; flex-direction:column;
+      border:1px solid #d8d8d5;
+      background:#fff;
+      margin-top:0.75rem;
+    }
+    .status-strip-title {
+      font-family:'Inter',sans-serif;
+      font-size:10px; font-weight:600;
+      text-transform:uppercase; letter-spacing:.4px;
+      color:#888; padding:0.5rem 0.7rem 0.3rem;
+      border-bottom:1px solid #e8e8e5;
+      flex-shrink:0;
+    }
+    .status-rows { padding:0.5rem 0.7rem; display:flex; flex-direction:column; gap:0.5rem; }
+    .sr {
+      display:flex; justify-content:space-between; align-items:center;
+      font-family:'Inter',sans-serif; font-size:11px;
+    }
+    .sr-key { color:#999; font-size:10px; text-transform:uppercase; letter-spacing:.3px; }
+    .sr-val { color:#2c2c2c; font-weight:600; }
+    .sr-val.ok { color:#3a8a3a; }
+    .sr-val.warn { color:#b06000; }
+    .sr-val.action {
+      color:#2c5aa0;
+      font-style:italic;
+      font-weight:400;
+    }
+
+    /* ── FOOTER ──────────────────────────────────────── */
+    footer {
+      flex-shrink:0;
+      border-top:1px solid #d0d0d0;
+      padding:0.4rem 0;
+      font-family:'Inter',sans-serif;
+      font-size:10px; color:#bbb;
+      text-align:center; letter-spacing:.3px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="hd-top">
+      <div class="masthead">K1 Control</div>
+      <div class="tagline">AI Innovation Center · FIPSE Grant</div>
+    </div>
+    <div class="hd-meta">
+      <div class="status-group">
+        <div class="status-dot-wrap">
+          <div class="dot"></div>
+          <span>Robot connected</span>
+        </div>
+        <div class="ip-tag">192.168.0.176</div>
+      </div>
+      <a href="https://docs.boosterrobotics.com/" target="_blank" class="booster-link">Booster firmware manual</a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ════════════════════════════════════════
+         LEFT — Controls
+    ═════════════════════════════════════════ -->
+    <section class="col">
+      <div class="col-title">Controls</div>
+      <div class="left-scroll">
+
+        <span class="lbl">Movement</span>
+        <div class="move-pad">
+          <div></div>
+          <div class="mc">
+            <button class="mb">↑</button>
+            <div class="ml">Walk forward</div>
+          </div>
+          <div></div>
+
+          <div class="mc">
+            <button class="mb">←</button>
+            <div class="ml">Turn left</div>
+          </div>
+          <div class="mc">
+            <button class="mb">◎</button>
+            <div class="ml">Stop</div>
+          </div>
+          <div class="mc">
+            <button class="mb">→</button>
+            <div class="ml">Turn right</div>
+          </div>
+
+          <div></div>
+          <div class="mc">
+            <button class="mb">↓</button>
+            <div class="ml">Walk backward</div>
+          </div>
+          <div></div>
+        </div>
+
+        <hr class="sep">
+
+        <!-- Gestures -->
+        <span class="lbl">Gestures</span>
+        <div class="gest-grid">
+
+          <!-- Wave -->
+          <button class="gb">
+            <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
+              <circle cx="20" cy="7" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
+              <line x1="20" y1="12" x2="20" y2="30" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M20 17 Q28 10 33 5" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              <line x1="20" y1="17" x2="12" y2="24" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="30" x2="15" y2="44" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="30" x2="25" y2="44" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M34 3 Q36 1 38 3" stroke="#2c2c2c" stroke-width="1" stroke-linecap="round" fill="none"/>
+              <path d="M32 1 Q35 -1 37 1" stroke="#2c2c2c" stroke-width="1" stroke-linecap="round" fill="none"/>
+            </svg>
+            <span>Wave</span>
+          </button>
+
+          <!-- Nod -->
+          <button class="gb">
+            <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
+              <circle cx="20" cy="9" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
+              <path d="M15 9 Q15 4 20 4" stroke="#2c2c2c" stroke-width="1" stroke-linecap="round" fill="none"/>
+              <polygon points="20,2 18,5 22,5" fill="#2c2c2c"/>
+              <line x1="20" y1="14" x2="20" y2="31" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="18" x2="11" y2="25" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="18" x2="29" y2="25" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="31" x2="15" y2="45" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="31" x2="25" y2="45" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>Nod</span>
+          </button>
+
+          <!-- Thumbs up -->
+          <button class="gb">
+            <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
+              <circle cx="20" cy="7" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
+              <line x1="20" y1="12" x2="20" y2="30" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="17" x2="32" y2="20" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <rect x="32" y="18" width="6" height="6" rx="1" stroke="#2c2c2c" stroke-width="1.2" fill="none"/>
+              <line x1="34" y1="18" x2="34" y2="12" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="17" x2="11" y2="24" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="30" x2="15" y2="44" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20" y1="30" x2="25" y2="44" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>Thumbs up</span>
+          </button>
+        </div>
+
+        <hr class="sep">
+
+        <!-- Mode -->
+        <span class="lbl">Robot mode</span>
+        <div style="display:flex;gap:6px;margin-bottom:0.6rem;">
+          <button class="green" id="btn-walk" onclick="setMode('walk')" style="flex:1;">Walk</button>
+          <button class="sec"   id="btn-damp" onclick="setMode('damp')" style="flex:1;">Damp</button>
+        </div>
+
+        <!-- Voice -->
+        <span class="lbl">Voice</span>
+        <div style="position:relative;margin-bottom:0.6rem;">
+          <select>
+            <optgroup label="Piper TTS — local">
+              <option>Lessac · US male (default)</option>
+              <option>Amy · US female</option>
+              <option>Kathleen · US female</option>
+              <option>Ryan · US male</option>
+              <option>Danny · US male, deep</option>
+              <option>Alan · British male</option>
+              <option>Cori · British female</option>
+            </optgroup>
+            <optgroup label="OpenAI TTS — API key required">
+              <option>Nova · warm female</option>
+              <option>Alloy · neutral</option>
+              <option>Echo · male</option>
+              <option>Shimmer · soft female</option>
+            </optgroup>
+          </select>
+          <svg style="position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="#666" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        </div>
+
+        <!-- Volume -->
+        <span class="lbl">Volume</span>
+        <div class="sl-row" style="margin-bottom:.55rem;">
+          <input type="range" min="0" max="100" value="70" id="vol-r">
+          <span class="sl-val" id="vol-v">70%</span>
+        </div>
+
+        <!-- Speed -->
+        <span class="lbl">Response speed</span>
+        <div class="sl-row">
+          <input type="range" min="1" max="10" value="5" id="spd-r">
+          <span class="sl-val" id="spd-v">Normal</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         MIDDLE — Conversation
+    ═════════════════════════════════════════ -->
+    <section class="col">
+      <div class="col-title">Conversation</div>
+      <div class="conv-panel">
+
+        <!-- LLM selector -->
+        <div class="llm-bar">
+          <div class="llm-pills">
+            <button class="llm-pill active" id="pill-ollama"    onclick="selectLLM('ollama')">Ollama (local)</button>
+            <button class="llm-pill"         id="pill-anthropic" onclick="selectLLM('anthropic')">Anthropic</button>
+            <button class="llm-pill"         id="pill-openai"    onclick="selectLLM('openai')">OpenAI</button>
+          </div>
+          <div id="api-key-area" style="display:none;">
+            <div class="api-key-row">
+              <input type="password" id="api-key-input" placeholder="Paste session API key…">
+              <button onclick="applyKey()" style="flex:none;padding:6px 10px;font-size:10px;">Apply</button>
+              <button class="sec" onclick="clearKey()" style="flex:none;padding:6px 8px;font-size:10px;">✕</button>
+            </div>
+            <div class="session-note">Key stored in memory only — cleared when you close or refresh this tab.</div>
+          </div>
+        </div>
+
+        <!-- Chat history -->
+        <div class="chat-history" id="chat-history">
+          <div class="cm user">
+            <div class="who">You</div>
+            <div class="bub">What is your name?</div>
+          </div>
+          <div class="cm robot">
+            <div class="who">K1 · Ollama / Llama 3</div>
+            <div class="bub">I am K1, a humanoid robot at Hillsborough College's AI Innovation Center. I'm here to help demonstrate the integration of large language models with physical robotics. How can I help you today?</div>
+          </div>
+          <div class="cm user">
+            <div class="who">You</div>
+            <div class="bub">Can you wave hello to everyone?</div>
+          </div>
+          <div class="cm robot">
+            <div class="who">K1 · Ollama / Llama 3</div>
+            <div class="bub">Of course! Hello everyone, welcome to the AI Innovation Center! [ACTION: wave]</div>
+          </div>
+        </div>
+
+        <hr class="chat-sep">
+
+        <!-- Input -->
+        <div class="chat-foot">
+          <textarea class="msg-in" id="msg-in" placeholder="Type a message or command for K1…"></textarea>
+          <div class="chat-btns">
+            <button style="flex:2" onclick="sendMsg()">Send</button>
+            <button class="sec" style="flex:1" onclick="clearChat()">Clear</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         RIGHT — Live
+    ═════════════════════════════════════════ -->
+    <section class="col">
+      <div class="col-title">Live</div>
+
+      <!-- Real / Isaac toggle -->
+      <div class="view-toggle">
+        <button class="vt-btn active" id="vt-real"  onclick="setView('real')">Real camera</button>
+        <button class="vt-btn"        id="vt-isaac" onclick="setView('isaac')">Isaac sim</button>
+      </div>
+
+      <!-- Viewport -->
+      <div class="view-port">
+        <!-- Real camera placeholder -->
+        <div class="cam-placeholder" id="cam-real">
+          <svg width="36" height="28" viewBox="0 0 36 28" fill="none" opacity=".35">
+            <rect x="1" y="5" width="34" height="22" rx="3" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="18" cy="16" r="7" stroke="#fff" stroke-width="1.5"/>
+            <circle cx="18" cy="16" r="3" stroke="#fff" stroke-width="1"/>
+            <path d="M12 5V3a2 2 0 012-2h8a2 2 0 012 2v2" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="29" cy="9" r="1.5" fill="#fff"/>
+          </svg>
+          <span>Live Camera Feed</span>
+        </div>
+
+        <!-- Isaac Sim placeholder -->
+        <div class="isaac-placeholder" id="cam-isaac">
+          <div class="isaac-logo">NVIDIA Isaac Sim</div>
+          <div class="isaac-info">Streaming from your inference server.<br>Make sure Isaac Sim is running with<br>WebRTC streaming enabled.</div>
+          <div class="isaac-url">http://192.168.0.100:8211/streaming</div>
+          <button class="isaac-connect" onclick="launchIsaac()">Connect to simulator</button>
+        </div>
+      </div>
+
+      <!-- Robot status strip -->
+      <div class="status-strip">
+        <div class="status-strip-title">Robot status</div>
+        <div class="status-rows">
+          <div class="sr">
+            <span class="sr-key">Mode</span>
+            <span class="sr-val ok" id="st-mode">Walk</span>
+          </div>
+          <div class="sr">
+            <span class="sr-key">Battery</span>
+            <span class="sr-val ok" id="st-batt">87%</span>
+          </div>
+          <div class="sr">
+            <span class="sr-key">Latency</span>
+            <span class="sr-val" id="st-lat">24 ms</span>
+          </div>
+          <div class="sr">
+            <span class="sr-key">LLM provider</span>
+            <span class="sr-val" id="st-llm">Ollama / Llama 3</span>
+          </div>
+          <div class="sr">
+            <span class="sr-key">Last action</span>
+            <span class="sr-val action" id="st-action">wave executed</span>
+          </div>
+          <div class="sr">
+            <span class="sr-key">View</span>
+            <span class="sr-val" id="st-view">Real camera</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>K1 Wizard of Oz Dashboard &nbsp;·&nbsp; Hillsborough College AI Innovation Center &nbsp;·&nbsp; FIPSE Grant Program</footer>
+</div>
+
+<script>
+  /* ── Sliders ── */
+  const volR = document.getElementById('vol-r');
+  const volV = document.getElementById('vol-v');
+  const spdR = document.getElementById('spd-r');
+  const spdV = document.getElementById('spd-v');
+  const spdL = ['','Very slow','Slow','Slower','Moderate','Normal','Quick','Fast','Very fast','Rapid','Immediate'];
+  volR.addEventListener('input', e => { volV.textContent = Math.round(e.target.value) + '%'; });
+  spdR.addEventListener('input', e => { spdV.textContent = spdL[Math.round(e.target.value)]; });
+
+  /* ── Robot mode ── */
+  function setMode(m) {
+    document.getElementById('btn-walk').className = m === 'walk' ? 'green' : 'sec';
+    document.getElementById('btn-damp').className = m === 'damp' ? 'active-dark' : 'sec';
+    document.getElementById('st-mode').textContent = m === 'walk' ? 'Walk' : 'Damp';
+    document.getElementById('st-mode').className   = m === 'walk' ? 'sr-val ok' : 'sr-val warn';
+  }
+
+  /* ── LLM selector ── */
+  let currentLLM = 'ollama';
+  const llmLabels = { ollama:'Ollama / Llama 3', anthropic:'Anthropic / Claude', openai:'OpenAI / GPT-4o' };
+
+  function selectLLM(p) {
+    currentLLM = p;
+    ['ollama','anthropic','openai'].forEach(id => {
+      document.getElementById('pill-' + id).classList.toggle('active', id === p);
+    });
+    document.getElementById('api-key-area').style.display = (p === 'ollama') ? 'none' : 'block';
+    document.getElementById('st-llm').textContent = llmLabels[p];
+  }
+
+  function applyKey()  { document.getElementById('api-key-input').style.borderColor = '#3a8a3a'; }
+  function clearKey()  {
+    document.getElementById('api-key-input').value = '';
+    document.getElementById('api-key-input').style.borderColor = '';
+  }
+
+  /* ── Chat ── */
+  function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function sendMsg() {
+    const inp = document.getElementById('msg-in');
+    const t = inp.value.trim();
+    if (!t) return;
+    const h = document.getElementById('chat-history');
+    const d = document.createElement('div');
+    d.className = 'cm user';
+    d.innerHTML = '<div class="who">You</div><div class="bub">' + esc(t) + '</div>';
+    h.appendChild(d);
+    inp.value = '';
+    h.scrollTop = h.scrollHeight;
+  }
+
+  function clearChat() { document.getElementById('chat-history').innerHTML = ''; }
+
+  document.getElementById('msg-in').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+  });
+
+  /* ── View toggle (Real / Isaac) ── */
+  function setView(v) {
+    document.getElementById('vt-real').classList.toggle('active',  v === 'real');
+    document.getElementById('vt-isaac').classList.toggle('active', v === 'isaac');
+    document.getElementById('cam-real').style.display  = v === 'real'  ? 'flex' : 'none';
+    const ip = document.getElementById('cam-isaac');
+    ip.classList.toggle('visible', v === 'isaac');
+    document.getElementById('st-view').textContent = v === 'real' ? 'Real camera' : 'Isaac sim';
+  }
+
+  function launchIsaac() {
+    window.open('http://192.168.0.100:8211/streaming/webrtc-demo/?server=192.168.0.100','_blank');
+  }
+</script>
+</body>
+</html>

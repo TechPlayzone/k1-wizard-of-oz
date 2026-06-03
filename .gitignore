@@ -1,0 +1,46 @@
+# ── Secrets — NEVER commit these ─────────────────────────────
+.env
+config.json
+*.key
+*.pem
+
+# ── Python ───────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Voice models (large binary files) ────────────────────────
+voices/
+*.onnx
+*.onnx.json
+
+# ── Whisper model cache ───────────────────────────────────────
+~/.cache/whisper/
+
+# ── Audio temp files ──────────────────────────────────────────
+*.wav
+*.mp3
+tmp_audio/
+
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editors ───────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Logs ─────────────────────────────────────────────────────
+*.log
+logs/
