@@ -54,7 +54,7 @@ from session_manager import session_store
 
 app = Flask(
     __name__,
-    static_folder=os.path.join(os.path.dirname(__file__), "..", "frontend"),
+    static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend"),
 )
 app.secret_key = cfg.FLASK_SECRET_KEY
 CORS(app, supports_credentials=True)

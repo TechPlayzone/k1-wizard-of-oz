@@ -49,7 +49,7 @@ class Config:
     ISAAC_SERVER_IP:  str = os.getenv("ISAAC_SERVER_IP",  "192.168.0.100")
     ISAAC_STREAM_PORT: int = int(os.getenv("ISAAC_STREAM_PORT", 8211))
 
-    def validate(self) -> list[str]:
+    def validate(self):
         """
         Returns a list of warning strings for missing or default values.
         Called at startup so educators see clear guidance.

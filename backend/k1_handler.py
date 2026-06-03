@@ -106,7 +106,7 @@ class K1Robot:
 
     # ── Movement commands ─────────────────────────────────────────────────────
 
-    def move(self, command: str, duration: float | None = None) -> bool:
+    def move(self, command: str, duration: object = None) -> bool:
         """
         Execute a movement command.
 

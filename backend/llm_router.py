@@ -12,7 +12,7 @@ Usage:
     response = get_llm_response(
         provider="ollama",
         message="Hello, what can you do?",
-        api_key=None,          # not needed for Ollama
+        api_key = None,          # not needed for Ollama
         conversation_history=[]
     )
 """
@@ -56,8 +56,8 @@ Examples:
 def get_llm_response(
     provider: str,
     message: str,
-    api_key: str | None = None,
-    conversation_history: list[dict] | None = None,
+    api_key = None,
+    conversation_history = None,
 ) -> str:
     """
     Route a message to the appropriate LLM and return the text response.
@@ -94,7 +94,7 @@ def get_llm_response(
 
 # ── Ollama ────────────────────────────────────────────────────────────────────
 
-def _call_ollama(message: str, history: list[dict]) -> str:
+def _call_ollama(message: str, history: list) -> str:
     messages = _build_messages(message, history)
     try:
         response = requests.post(
@@ -119,7 +119,7 @@ def _call_ollama(message: str, history: list[dict]) -> str:
 
 # ── Anthropic ─────────────────────────────────────────────────────────────────
 
-def _call_anthropic(message: str, history: list[dict], api_key: str) -> str:
+def _call_anthropic(message: str, history: list, api_key: str) -> str:
     try:
         import anthropic
         client = anthropic.Anthropic(api_key=api_key)
@@ -137,7 +137,7 @@ def _call_anthropic(message: str, history: list[dict], api_key: str) -> str:
 
 # ── OpenAI ────────────────────────────────────────────────────────────────────
 
-def _call_openai(message: str, history: list[dict], api_key: str) -> str:
+def _call_openai(message: str, history: list, api_key: str) -> str:
     try:
         from openai import OpenAI
         client = OpenAI(api_key=api_key)
@@ -156,9 +156,9 @@ def _call_openai(message: str, history: list[dict], api_key: str) -> str:
 
 def _build_messages(
     message: str,
-    history: list[dict],
+    history: list,
     include_system: bool = True,
-) -> list[dict]:
+):
     """
     Build the messages array for the LLM call.
     Prepends the system prompt and appends the current user message.
@@ -173,7 +173,7 @@ def _build_messages(
 
 # ── Action tag parser ─────────────────────────────────────────────────────────
 
-def extract_action(response_text: str) -> tuple[str, str | None]:
+def extract_action(response_text: str):
     """
     Parse an action tag out of the LLM response.
 
