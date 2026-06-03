@@ -458,27 +458,27 @@
         <div class="move-pad">
           <div></div>
           <div class="mc">
-            <button class="mb">↑</button>
+            <button class="mb" onclick="sendMove('walk_forward')">↑</button>
             <div class="ml">Walk forward</div>
           </div>
           <div></div>
 
           <div class="mc">
-            <button class="mb">←</button>
+            <button class="mb" onclick="sendMove('turn_left')">←</button>
             <div class="ml">Turn left</div>
           </div>
           <div class="mc">
-            <button class="mb">◎</button>
+            <button class="mb" onclick="sendMove('stop')">◎</button>
             <div class="ml">Stop</div>
           </div>
           <div class="mc">
-            <button class="mb">→</button>
+            <button class="mb" onclick="sendMove('turn_right')">→</button>
             <div class="ml">Turn right</div>
           </div>
 
           <div></div>
           <div class="mc">
-            <button class="mb">↓</button>
+            <button class="mb" onclick="sendMove('walk_backward')">↓</button>
             <div class="ml">Walk backward</div>
           </div>
           <div></div>
@@ -491,7 +491,7 @@
         <div class="gest-grid">
 
           <!-- Wave -->
-          <button class="gb">
+          <button class="gb" onclick="sendGesture('wave')">
             <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
               <circle cx="20" cy="7" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
               <line x1="20" y1="12" x2="20" y2="30" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
@@ -506,7 +506,7 @@
           </button>
 
           <!-- Nod -->
-          <button class="gb">
+          <button class="gb" onclick="sendGesture('nod')">
             <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
               <circle cx="20" cy="9" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
               <path d="M15 9 Q15 4 20 4" stroke="#2c2c2c" stroke-width="1" stroke-linecap="round" fill="none"/>
@@ -521,7 +521,7 @@
           </button>
 
           <!-- Thumbs up -->
-          <button class="gb">
+          <button class="gb" onclick="sendGesture('thumbs_up')">
             <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
               <circle cx="20" cy="7" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
               <line x1="20" y1="12" x2="20" y2="30" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
@@ -715,7 +715,20 @@
 </div>
 
 <script>
-  /* ── Sliders ── */
+  // ── Config ──────────────────────────────────────────────────
+  const API = '';  // Empty = same origin (Flask serves the dashboard)
+
+  // ── State ───────────────────────────────────────────────────
+  let currentLLM      = 'ollama';
+  let conversationHistory = [];  // Sent to backend for multi-turn context
+
+  const llmLabels = {
+    ollama:    'Ollama / Llama 3',
+    anthropic: 'Anthropic / Claude',
+    openai:    'OpenAI / GPT-4o'
+  };
+
+  // ── Sliders ──────────────────────────────────────────────────
   const volR = document.getElementById('vol-r');
   const volV = document.getElementById('vol-v');
   const spdR = document.getElementById('spd-r');
@@ -724,18 +737,139 @@
   volR.addEventListener('input', e => { volV.textContent = Math.round(e.target.value) + '%'; });
   spdR.addEventListener('input', e => { spdV.textContent = spdL[Math.round(e.target.value)]; });
 
-  /* ── Robot mode ── */
-  function setMode(m) {
+  // ── Utility ──────────────────────────────────────────────────
+  function esc(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function post(path, body) {
+    const res = await fetch(API + path, {
+      method:      'POST',
+      headers:     { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body:        JSON.stringify(body),
+    });
+    return res.json();
+  }
+
+  async function get(path) {
+    const res = await fetch(API + path, { credentials: 'include' });
+    return res.json();
+  }
+
+  // ── Chat history DOM helper ───────────────────────────────────
+  function appendMessage(role, text, provider) {
+    const h    = document.getElementById('chat-history');
+    const div  = document.createElement('div');
+    div.className = `cm ${role}`;
+    const who  = role === 'user'
+      ? 'You'
+      : `K1 · ${llmLabels[provider] || provider}`;
+    div.innerHTML = `<div class="who">${esc(who)}</div><div class="bub">${esc(text)}</div>`;
+    h.appendChild(div);
+    h.scrollTop = h.scrollHeight;
+    return div;
+  }
+
+  function appendError(msg) {
+    const h   = document.getElementById('chat-history');
+    const div = document.createElement('div');
+    div.className = 'cm';
+    div.innerHTML = `<div class="who" style="color:#c0392b">Error</div><div class="bub" style="background:#fdf0f0;color:#c0392b">${esc(msg)}</div>`;
+    h.appendChild(div);
+    h.scrollTop = h.scrollHeight;
+  }
+
+  function setLoading(on) {
+    const btn = document.querySelector('.chat-btns button:first-child');
+    btn.textContent  = on ? 'Sending…' : 'Send';
+    btn.disabled     = on;
+  }
+
+  // ── Send chat message ─────────────────────────────────────────
+  async function sendMsg() {
+    const inp  = document.getElementById('msg-in');
+    const text = inp.value.trim();
+    if (!text) return;
+
+    // Show user message immediately
+    appendMessage('user', text, currentLLM);
+    conversationHistory.push({ role: 'user', content: text });
+    inp.value = '';
+    setLoading(true);
+
+    try {
+      const data = await post('/api/chat/send', {
+        message:  text,
+        provider: currentLLM,
+        history:  conversationHistory.slice(-10),  // Last 10 turns for context
+      });
+
+      if (data.error) {
+        appendError(data.error);
+      } else {
+        appendMessage('robot', data.clean_response, currentLLM);
+        conversationHistory.push({ role: 'assistant', content: data.clean_response });
+
+        // Update status strip
+        if (data.action) {
+          document.getElementById('st-action').textContent = `${data.action} executed`;
+        }
+      }
+    } catch (err) {
+      appendError('Could not reach the backend. Is Flask running?');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function clearChat() {
+    document.getElementById('chat-history').innerHTML = '';
+    conversationHistory = [];
+  }
+
+  document.getElementById('msg-in').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+  });
+
+  // ── Movement ──────────────────────────────────────────────────
+  async function sendMove(command) {
+    try {
+      const data = await post('/api/robot/move', { command });
+      document.getElementById('st-action').textContent = `${command.replace('_',' ')}`;
+      if (!data.ok) console.warn('[move] Backend returned ok:false', data);
+    } catch (err) {
+      console.error('[move] Error:', err);
+    }
+  }
+
+  // ── Gestures ──────────────────────────────────────────────────
+  async function sendGesture(name) {
+    try {
+      const data = await post('/api/robot/gesture', { gesture: name });
+      document.getElementById('st-action').textContent = `${name} executed`;
+      if (!data.ok) console.warn('[gesture] Backend returned ok:false', data);
+    } catch (err) {
+      console.error('[gesture] Error:', err);
+    }
+  }
+
+  // ── Robot mode ────────────────────────────────────────────────
+  async function setMode(m) {
+    // Update UI immediately for responsiveness
     document.getElementById('btn-walk').className = m === 'walk' ? 'green' : 'sec';
     document.getElementById('btn-damp').className = m === 'damp' ? 'active-dark' : 'sec';
     document.getElementById('st-mode').textContent = m === 'walk' ? 'Walk' : 'Damp';
     document.getElementById('st-mode').className   = m === 'walk' ? 'sr-val ok' : 'sr-val warn';
+
+    try {
+      await post('/api/robot/mode', { mode: m });
+    } catch (err) {
+      console.error('[mode] Error:', err);
+    }
   }
 
-  /* ── LLM selector ── */
-  let currentLLM = 'ollama';
-  const llmLabels = { ollama:'Ollama / Llama 3', anthropic:'Anthropic / Claude', openai:'OpenAI / GPT-4o' };
-
+  // ── LLM selector ─────────────────────────────────────────────
   function selectLLM(p) {
     currentLLM = p;
     ['ollama','anthropic','openai'].forEach(id => {
@@ -745,41 +879,84 @@
     document.getElementById('st-llm').textContent = llmLabels[p];
   }
 
-  function applyKey()  { document.getElementById('api-key-input').style.borderColor = '#3a8a3a'; }
-  function clearKey()  {
+  // ── Session API key ───────────────────────────────────────────
+  async function applyKey() {
+    const key = document.getElementById('api-key-input').value.trim();
+    if (!key) return;
+
+    try {
+      const data = await post('/api/session/set-key', {
+        provider: currentLLM,
+        api_key:  key,
+      });
+      if (data.ok) {
+        document.getElementById('api-key-input').style.borderColor = '#3a8a3a';
+      } else {
+        document.getElementById('api-key-input').style.borderColor = '#c0392b';
+      }
+    } catch (err) {
+      console.error('[api-key] Error:', err);
+    }
+  }
+
+  async function clearKey() {
     document.getElementById('api-key-input').value = '';
     document.getElementById('api-key-input').style.borderColor = '';
+    try {
+      await post('/api/session/clear-key', { provider: currentLLM });
+    } catch (err) {
+      console.error('[clear-key] Error:', err);
+    }
   }
 
-  /* ── Chat ── */
-  function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  // ── Robot status polling ──────────────────────────────────────
+  async function pollStatus() {
+    try {
+      const data = await get('/api/robot/status');
 
-  function sendMsg() {
-    const inp = document.getElementById('msg-in');
-    const t = inp.value.trim();
-    if (!t) return;
-    const h = document.getElementById('chat-history');
-    const d = document.createElement('div');
-    d.className = 'cm user';
-    d.innerHTML = '<div class="who">You</div><div class="bub">' + esc(t) + '</div>';
-    h.appendChild(d);
-    inp.value = '';
-    h.scrollTop = h.scrollHeight;
+      // Connection dot
+      const dot = document.querySelector('.dot');
+      dot.style.background = data.connected ? '#4caf50' : '#e74c3c';
+
+      // IP tag
+      const ipTag = document.querySelector('.ip-tag');
+      if (ipTag) ipTag.style.opacity = data.connected ? '1' : '0.4';
+
+      // Status strip values
+      if (data.battery !== null && data.battery !== undefined) {
+        const battEl = document.getElementById('st-batt');
+        battEl.textContent = data.battery + '%';
+        battEl.className   = data.battery > 20 ? 'sr-val ok' : 'sr-val warn';
+      }
+      if (data.latency_ms !== null && data.latency_ms !== undefined) {
+        document.getElementById('st-lat').textContent = data.latency_ms + ' ms';
+      }
+      if (data.mode) {
+        document.getElementById('st-mode').textContent = data.mode;
+        document.getElementById('st-mode').className   =
+          data.mode === 'walk' ? 'sr-val ok' : 'sr-val warn';
+      }
+    } catch (err) {
+      // Flask not running — show disconnected
+      document.querySelector('.dot').style.background = '#e74c3c';
+    }
   }
 
-  function clearChat() { document.getElementById('chat-history').innerHTML = ''; }
+  // Poll every 10 seconds
+  pollStatus();
+  setInterval(pollStatus, 10000);
 
-  document.getElementById('msg-in').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+  // ── Session cleanup on tab close ─────────────────────────────
+  window.addEventListener('beforeunload', () => {
+    navigator.sendBeacon(API + '/api/session/logout', '{}');
   });
 
-  /* ── View toggle (Real / Isaac) ── */
+  // ── View toggle (Real / Isaac) ────────────────────────────────
   function setView(v) {
     document.getElementById('vt-real').classList.toggle('active',  v === 'real');
     document.getElementById('vt-isaac').classList.toggle('active', v === 'isaac');
-    document.getElementById('cam-real').style.display  = v === 'real'  ? 'flex' : 'none';
-    const ip = document.getElementById('cam-isaac');
-    ip.classList.toggle('visible', v === 'isaac');
+    document.getElementById('cam-real').style.display = v === 'real' ? 'flex' : 'none';
+    document.getElementById('cam-isaac').classList.toggle('visible', v === 'isaac');
     document.getElementById('st-view').textContent = v === 'real' ? 'Real camera' : 'Isaac sim';
   }
 
