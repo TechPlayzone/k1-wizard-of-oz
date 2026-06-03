@@ -61,7 +61,7 @@ class K1Robot:
             self.connected = True
             return True
         try:
-            self.client = B1LocoClient(cfg.K1_IP, cfg.K1_PORT)
+            self.client = B1LocoClient()
             self.client.Init()
             self.connected = True
             print(f"[K1] Connected to {cfg.K1_IP}:{cfg.K1_PORT}")
