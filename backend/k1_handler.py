@@ -68,7 +68,7 @@ class K1Robot:
             return True
         try:
             # Required first step — initializes DDS channel factory
-            ChannelFactory.Instance().Init(0)
+            ChannelFactory.Instance().Init(0, "wlP5p1s0")
             self.client = B1LocoClient()
             self.client.Init()
             self.connected = True
