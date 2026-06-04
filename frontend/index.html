@@ -541,9 +541,10 @@
         <!-- Mode -->
         <span class="lbl">Robot mode</span>
         <div style="display:flex;gap:6px;margin-bottom:0.6rem;">
-          <button class="green" id="btn-walk" onclick="setMode('walk')" style="flex:1;">Walk</button>
           <button class="sec"   id="btn-damp" onclick="setMode('damp')" style="flex:1;">Damp</button>
+          <button style="flex:1;border-color:#b06000;color:#b06000;" id="btn-prep" onclick="setMode('prep')">Prep</button>
           <button style="flex:1;border-color:#2c5aa0;color:#2c5aa0;" onclick="standUp()">Stand</button>
+          <button class="green" id="btn-walk" onclick="setMode('walk')" style="flex:1;">Walk</button>
         </div>
 
         <!-- Voice -->
