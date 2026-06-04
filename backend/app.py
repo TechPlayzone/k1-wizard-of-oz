@@ -226,6 +226,13 @@ def camera_status():
     return jsonify({"live": camera_handler.has_frame})
 
 
+@app.route("/api/robot/standup", methods=["POST"])
+def robot_standup():
+    """Command robot to stand up using GetUp()."""
+    ok = robot.get_up()
+    return jsonify({"ok": ok})
+
+
 # ── Robot movement ────────────────────────────────────────────────────────────
 
 @app.route("/api/robot/move", methods=["POST"])

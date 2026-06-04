@@ -543,6 +543,7 @@
         <div style="display:flex;gap:6px;margin-bottom:0.6rem;">
           <button class="green" id="btn-walk" onclick="setMode('walk')" style="flex:1;">Walk</button>
           <button class="sec"   id="btn-damp" onclick="setMode('damp')" style="flex:1;">Damp</button>
+          <button style="flex:1;border-color:#2c5aa0;color:#2c5aa0;" onclick="standUp()">Stand</button>
         </div>
 
         <!-- Voice -->
@@ -830,6 +831,17 @@
   document.getElementById('msg-in').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
   });
+
+  // ── Stand up ──────────────────────────────────────────────
+  async function standUp() {
+    try {
+      const data = await post('/api/robot/standup', {});
+      document.getElementById('st-action').textContent = 'stand up';
+      if (!data.ok) console.warn('[standup] Backend returned ok:false', data);
+    } catch (err) {
+      console.error('[standup] Error:', err);
+    }
+  }
 
   // ── Movement ──────────────────────────────────────────────────
   async function sendMove(command) {
