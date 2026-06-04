@@ -1,137 +1,175 @@
 # Troubleshooting Guide
 
 **K1 Wizard-of-Oz Dashboard**
-Hillsborough College AI Innovation Center
+Hillsborough College AI Innovation Center · AI PREP4WORK Initiative
 
 ---
 
-## K1 robot not reachable
+## Robot falls without warning
 
-**Symptom:** `test_connection.py` reports K1 unreachable, or dashboard shows
-"Robot disconnected" (red dot).
+**Cause:** Battery died while using the dashboard. The Booster app's battery
+warnings are bypassed when using the Wizard-of-Oz Dashboard.
 
-**Fixes:**
-1. Confirm the K1 is powered on and fully booted (~60 seconds after power-on).
-2. Confirm both your laptop and K1 are on the **same** WiFi network.
-3. Run `ping <K1_IP>` from your terminal. No response = network issue.
-4. Check your router's connected device list to confirm the K1's current IP.
-   Update `K1_IP` in `.env` if it changed.
-5. SSH into the K1 to confirm services are running:
-   ```bash
-   ssh booster@<K1_IP>
-   booster-cli launch -c status
-   ```
-   If services are stopped: `booster-cli launch -c start`
+**Fix:**
+- Always monitor the battery indicator in the dashboard status strip
+- Warning shows at < 20%, critical at < 10%
+- Order 2 batteries per K1 — charge one while using the other
+- The K1 5Ah battery must be charged separately from the robot
 
 ---
 
-## Whisper transcription errors or empty transcriptions
+## WaveHand never stops
 
-**Symptom:** K1 mic captures audio but text comes back empty or garbled.
+**Cause:** `WaveHand()` is a pre-programmed continuous motion. The SDK has
+no `StopGesture()` method.
 
-**Fixes:**
-1. Move to a quieter environment or reduce background noise.
-2. Speak directly toward the K1's head where the mic array is located.
-3. Try a larger Whisper model in `.env`:
-   ```
-   WHISPER_MODEL=medium
-   ```
-4. Verify ffmpeg is installed: `ffmpeg -version`
-5. If audio frames are empty, the mic driver may not be loaded. SSH into the K1
-   and check: `pactl list sources short`
-   The `alsa_input` device should be listed.
+**Fix:** Click the **Stand** button — `GetUp()` interrupts the current motion
+and returns the robot to neutral standing position.
 
 ---
 
-## Piper TTS produces no audio from K1 speaker
+## Perception machine fails (status code 400)
 
-**Symptom:** LLM responds but K1 is silent.
+**Cause:** `booster-cli launch -c start` was run while the robot was not
+upright. The perception machine requires the robot to be standing.
 
-**Fixes:**
-1. Confirm the voice model file exists at the path in `PIPER_VOICE_PATH`.
-2. Test Piper directly from your terminal:
-   ```bash
-   echo "Hello" | piper --model ./voices/en_US-lessac-medium.onnx --output_file test.wav
-   ```
-3. Verify the WAV file was copied to the robot:
-   ```bash
-   ssh booster@<K1_IP> "ls -la /tmp/k1_response.wav"
-   ```
-4. Check K1 volume via SDK or confirm speaker is not muted.
-5. Confirm espeak-ng is installed on the K1 if using the fallback pipeline:
-   ```bash
-   sudo apt-get install -y espeak-ng
-   ```
+**Fix:**
+1. Physically stand the robot upright (have spotter ready)
+2. `booster-cli launch -c stop` — wait 5 seconds
+3. `booster-cli launch -c start` — keep robot steady
+4. Wait for both motion and perception `start succeeded`
+
+---
+
+## Robot doesn't respond to movement commands
+
+**Cause:** Robot is not in the correct mode sequence.
+
+**Fix:** Always follow this exact sequence in the dashboard:
+```
+Damp → Prep → Stand → Walk
+```
+Do not skip steps. The robot must be physically standing before Walk mode.
+
+---
+
+## Dashboard shows wrong mode
+
+**Cause:** `GetMode()` returns a JSON parse error intermittently, so the
+dashboard shows the internally-tracked mode, not the actual robot mode.
+
+**Fix:** Use the `/motion_state` ROS2 topic to get real mode:
+```bash
+ros2 topic echo /motion_state --once
+```
+
+---
+
+## Piper TTS using espeak-ng instead
+
+**Cause:** `PIPER_VOICE_PATH` in `.env` uses a relative path (`./voices/`)
+instead of an absolute path. Flask runs from `backend/` so relative paths
+resolve incorrectly.
+
+**Fix:** Use absolute path in `.env`:
+```
+PIPER_VOICE_PATH=/home/booster/k1-wizard-of-oz/voices/en_US-libritts_r-medium.onnx
+```
+
+Verify:
+```bash
+cd ~/k1-wizard-of-oz/backend
+python3 -c "from config import cfg; print(cfg.PIPER_VOICE_PATH)"
+```
+Output must start with `/home/booster/` not `./home/booster/`.
+
+---
+
+## SSH connection drops when robot falls
+
+**Cause:** Robot loses WiFi when it falls and the connection resets.
+
+**Fix:**
+1. Wait for robot to be physically stabilized
+2. Reconnect to hotspot if needed
+3. SSH back in: `ssh booster@192.168.0.176`
+4. Check git status: `cd ~/k1-wizard-of-oz && git status`
+
+---
+
+## Robot won't connect to hotspot without Booster app
+
+**Fix:** Configure auto-connect once per hotspot SSID:
+```bash
+sudo nmcli device wifi connect "YourSSID" \
+  password "YourPassword" ifname wlP5p1s0
+```
+Robot will auto-connect on every boot. No app needed.
+
+---
+
+## Port 5000 already in use
+
+**Cause:** Previous Flask session didn't exit cleanly.
+
+**Fix:**
+```bash
+pkill -f "python3 app.py"
+bash scripts/run.sh
+```
+
+---
+
+## Booster SDK `GetMode()` JSON parse error
+
+**Cause:** Known intermittent issue with the SDK RPC response parsing.
+
+**Fix:** The error is non-fatal — ignore it. The dashboard falls back to
+internally-tracked mode. For accurate mode reading use:
+```bash
+ros2 topic echo /motion_state --once
+```
+
+---
+
+## Camera feed not showing
+
+**Cause:** ROS2 not sourced, or K1 services not running.
+
+**Fix:**
+```bash
+source /opt/ros/humble/setup.bash
+booster-cli launch -c status
+```
+If perception machine shows 400, see "Perception machine fails" above.
 
 ---
 
 ## Ollama not responding
 
-**Symptom:** Dashboard shows LLM error; backend logs `Connection refused` for Ollama.
+**Cause:** Ollama service not running.
 
-**Fixes:**
-1. Start Ollama in a separate terminal: `ollama serve`
-2. Confirm the model is downloaded: `ollama list` (should show `llama3`)
-3. If missing: `ollama pull llama3`
-4. Check `OLLAMA_URL` in `.env` — default is `http://localhost:11434`.
-   If Ollama is on a separate server, update this to its IP.
-5. Test directly: `curl http://localhost:11434/api/tags`
-
----
-
-## Movement commands not executing
-
-**Symptom:** Dashboard direction buttons do nothing; no error shown.
-
-**Fixes:**
-1. Confirm robot mode is set to **Walk** in the dashboard.
-   The K1 must be in Walk mode before movement commands are accepted.
-2. Confirm the robot completed the DAMP → PREP → WALK startup sequence.
-   Check backend logs for mode transition errors.
-3. Never command movement before PREP mode has held for at least 3 seconds.
-4. If the K1 is in a confined space, ensure there is at least 1 meter of
-   clearance in the movement direction.
-
-**Safety reminder:** The K1 weighs approximately 19.5 kg. Always test movement
-commands with the robot on a flat, clear surface and with a person nearby to
-catch it if it stumbles.
+**Fix:**
+```bash
+ollama serve &
+sleep 3
+ollama list
+```
 
 ---
 
-## API key errors (Anthropic / OpenAI)
+## ChannelFactory not initialized error
 
-**Symptom:** Selecting Anthropic or OpenAI shows an authentication error.
+**Cause:** `B1LocoClient()` called before `ChannelFactory.Instance().Init()`.
 
-**Fixes:**
-1. Confirm your API key is valid and has available credits.
-2. Keys must start with `sk-ant-` (Anthropic) or `sk-` (OpenAI).
-3. The K1 must be connected to a network **with internet access** when using
-   cloud providers. If using an isolated hotspot, switch to Ollama.
-4. Session keys are cleared on tab refresh. Re-enter the key after refreshing.
-
----
-
-## Isaac Sim not connecting
-
-**Symptom:** Clicking "Connect to simulator" opens a blank page.
-
-**Fixes:**
-1. Confirm Isaac Sim is running with streaming enabled on your server.
-2. Verify `ISAAC_SERVER_IP` in `.env` matches the server running Isaac Sim.
-3. Check that port 8211 is open and not blocked by a firewall:
-   ```bash
-   curl http://<ISAAC_SERVER_IP>:8211
-   ```
-4. Isaac Sim WebRTC requires a Chromium-based browser (Chrome or Edge).
+**Fix:** Always initialize ChannelFactory first:
+```python
+ChannelFactory.Instance().Init(0, "wlP5p1s0")
+client = B1LocoClient()
+client.Init()
+```
 
 ---
 
-## Still stuck?
-
-Open an issue at: https://github.com/TechPlayzone/k1-wizard-of-oz/issues
-
-Please include:
-- Your OS and Python version
-- K1 firmware version
-- The full error message from the backend terminal
-- Output of `python scripts/test_connection.py`
+*Hillsborough College AI Innovation Center · AI PREP4WORK Initiative*
+*Deshjuana Bagley, Associate Dean, A.S. Degree Programs*

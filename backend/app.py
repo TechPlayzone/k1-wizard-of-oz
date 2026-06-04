@@ -50,6 +50,7 @@ from tts             import synthesize, speak_on_robot, cleanup
 from stt             import transcribe_text
 from session_manager import session_store
 from camera          import camera_stream, camera_handler
+from battery_monitor import battery_monitor, get_battery_status
 
 # ── App setup ─────────────────────────────────────────────────────────────────
 
@@ -86,6 +87,9 @@ robot.connect()
 
 # Start camera handler (ROS2 native on K1)
 camera_handler.start()
+
+# Start battery monitor
+battery_monitor.start()
 
 # ── Static: serve dashboard ───────────────────────────────────────────────────
 
@@ -278,7 +282,14 @@ def robot_mode():
 @app.route("/api/robot/status", methods=["GET"])
 def robot_status():
     """Return current robot status for the dashboard status strip."""
-    return jsonify(robot.get_status())
+    status = robot.get_status()
+    # Overlay battery from ROS2 monitor (more reliable than SDK polling)
+    batt = get_battery_status()
+    if batt["level"] is not None:
+        status["battery"]  = batt["level"]
+        status["warning"]  = batt["warning"]
+        status["critical"] = batt["critical"]
+    return jsonify(status)
 
 
 # ── Gestures ──────────────────────────────────────────────────────────────────

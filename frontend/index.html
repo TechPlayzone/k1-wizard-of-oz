@@ -413,6 +413,20 @@
       font-weight:400;
     }
 
+    /* ── BATTERY WARNING ─────────────────────────────── */
+    #battery-alert {
+      display: none;
+      padding: 0.5rem 1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    #battery-alert.warning  { background: #fff3cd; color: #856404; border-bottom: 1px solid #ffc107; }
+    #battery-alert.critical { background: #f8d7da; color: #721c24; border-bottom: 1px solid #f5c6cb; animation: blink 1s step-start infinite; }
+    @keyframes blink { 50% { opacity: 0.4; } }
+
     /* ── FOOTER ──────────────────────────────────────── */
     footer {
       flex-shrink:0;
@@ -426,6 +440,9 @@
 </head>
 <body>
 <div class="page">
+
+  <!-- BATTERY WARNING BANNER -->
+  <div id="battery-alert"></div>
 
   <!-- HEADER -->
   <header>
@@ -833,6 +850,19 @@
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
   });
 
+  // ── Battery alerts ────────────────────────────────────────
+  function showBatteryAlert(msg, level) {
+    const el = document.getElementById('battery-alert');
+    el.textContent  = '⚠️ ' + msg;
+    el.className    = level;
+    el.style.display = 'block';
+  }
+  function hideBatteryAlert() {
+    const el = document.getElementById('battery-alert');
+    el.style.display = 'none';
+    el.className     = '';
+  }
+
   // ── Stand up ──────────────────────────────────────────────
   async function standUp() {
     try {
@@ -939,6 +969,15 @@
         const battEl = document.getElementById('st-batt');
         battEl.textContent = data.battery + '%';
         battEl.className   = data.battery > 20 ? 'sr-val ok' : 'sr-val warn';
+
+        // Show battery warning banner
+        if (data.critical) {
+          showBatteryAlert('CRITICAL: ' + data.battery + '% battery — robot may fall! Charge immediately.', 'critical');
+        } else if (data.warning) {
+          showBatteryAlert('LOW BATTERY: ' + data.battery + '% — prepare to charge soon.', 'warning');
+        } else {
+          hideBatteryAlert();
+        }
       }
       if (data.latency_ms !== null && data.latency_ms !== undefined) {
         document.getElementById('st-lat').textContent = data.latency_ms + ' ms';
