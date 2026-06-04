@@ -1,43 +1,61 @@
 #!/usr/bin/env bash
-# run.sh — Start the K1 Wizard-of-Oz Dashboard
-# Usage: bash scripts/run.sh
+# run.sh — Start the K1 Wizard-of-Oz Dashboard on the K1 robot
+#
+# Usage:
+#   bash ~/k1-wizard-of-oz/scripts/run.sh
+#
+# Hillsborough College AI Innovation Center
+# AI PREP4WORK Initiative — FIPSE Grant Program
+# Deshjuana Bagley, Associate Dean, A.S. Degree Programs
 
 set -e
 
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+BACKEND_DIR="$REPO_DIR/backend"
+
 echo ""
-echo "── K1 Wizard-of-Oz Dashboard ──────────────────────────"
+echo "── K1 Wizard-of-Oz Dashboard ────────────────────────────"
 echo "   Hillsborough College AI Innovation Center"
 echo "   AI PREP4WORK Initiative"
-echo "────────────────────────────────────────────────────────"
+echo "─────────────────────────────────────────────────────────"
 echo ""
 
-# Confirm .env exists
-if [ ! -f ".env" ]; then
-  echo "[ERROR] .env not found. Copy .env.example to .env first."
-  exit 1
+# Source ROS2
+if [ -f /opt/ros/humble/setup.bash ]; then
+    source /opt/ros/humble/setup.bash
+    echo "[OK] ROS2 Humble sourced"
+else
+    echo "[WARN] ROS2 not found at /opt/ros/humble/setup.bash"
+fi
+
+# Check .env
+if [ ! -f "$REPO_DIR/.env" ]; then
+    echo "[ERROR] .env not found. Run: cp $REPO_DIR/.env.example $REPO_DIR/.env"
+    exit 1
+fi
+
+# Start Ollama if not running
+if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
+    echo "[OK] Ollama already running"
+else
+    echo "[ ] Starting Ollama..."
+    ollama serve > /tmp/ollama.log 2>&1 &
+    sleep 3
+    echo "[OK] Ollama started"
 fi
 
 # Pre-flight check
-echo "Running pre-flight checks..."
-python scripts/test_connection.py || {
-  echo ""
-  echo "[WARN] Some checks failed. Continue anyway? (y/N)"
-  read -r answer
-  if [ "$answer" != "y" ] && [ "$answer" != "Y" ]; then
-    exit 1
-  fi
-}
-
-# Start Ollama in background if not running
-if ! curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
-  echo "Starting Ollama..."
-  ollama serve &
-  sleep 3
-fi
-
-# Start Flask backend
 echo ""
-echo "Starting backend server..."
-echo "Dashboard: http://localhost:5000"
+python3 "$REPO_DIR/scripts/test_connection.py" || true
+
+# Get robot IP
+ROBOT_IP=$(hostname -I | awk '{print $1}')
+
 echo ""
-python backend/app.py
+echo "Dashboard: http://$ROBOT_IP:5000"
+echo "Open this URL in any browser on the same network."
+echo "Press Ctrl+C to stop."
+echo ""
+
+cd "$BACKEND_DIR"
+python3 app.py

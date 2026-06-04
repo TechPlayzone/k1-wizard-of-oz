@@ -39,7 +39,7 @@ class SessionManager:
                 "last_used": datetime.utcnow(),
             }
 
-    def get_key(self, session_id: str, provider: str) -> str | None:
+    def get_key(self, session_id: str, provider: str) -> object:
         """
         Retrieve a session API key.
         Returns None if not set or session has expired.

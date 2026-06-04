@@ -46,7 +46,7 @@ from flask_cors import CORS
 from config          import cfg
 from llm_router      import get_llm_response, extract_action
 from k1_handler      import robot
-from tts             import synthesize, cleanup
+from tts             import synthesize, speak_on_robot, cleanup
 from stt             import transcribe_text
 from session_manager import session_store
 from camera          import camera_stream, camera_handler
@@ -84,15 +84,8 @@ _admin_pw_hash = bcrypt.hashpw(
 # Connect to K1 at startup
 robot.connect()
 
-# Start camera handler (requires ROS2 on Linux — degrades gracefully)
+# Start camera handler (ROS2 native on K1)
 camera_handler.start()
-
-# Start Isaac Sim bridge (requires ROS 2 — degrades gracefully if absent)
-try:
-    from isaac_bridge import isaac_bridge
-    isaac_bridge.start()
-except Exception as e:
-    print(f"[Isaac bridge] Not started: {e}")
 
 # ── Static: serve dashboard ───────────────────────────────────────────────────
 
@@ -177,7 +170,7 @@ def chat_send():
     wav_path = None
     try:
         wav_path = synthesize(clean_response)
-        tts_ok   = robot.speak(wav_path)
+        tts_ok   = speak_on_robot(wav_path)
     except Exception as e:
         print(f"[TTS/speak] {e}")
     finally:

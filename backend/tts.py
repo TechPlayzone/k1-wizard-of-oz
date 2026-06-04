@@ -1,13 +1,18 @@
 """
 tts.py
-Convert text to speech using Piper TTS.
+Text-to-speech for the K1 using Piper TTS + ROS2 audio topics.
 
-Piper runs locally with no internet connection required.
-Output is a WAV file written to a temp path, then sent to the K1 speaker.
+Pipeline:
+    Text → Piper TTS → WAV → ROS2 /booster/audio topics → K1 speaker
 
-Usage:
-    from tts import synthesize
-    wav_path = synthesize("Hello, I am K1.")
+Piper TTS runs locally on the K1 (ARM/aarch64 compatible).
+No internet required. No SSH/SCP needed — audio goes via ROS2.
+
+Fallback: if Piper not installed, uses espeak-ng directly.
+
+Hillsborough College AI Innovation Center
+AI PREP4WORK Initiative — FIPSE Grant Program
+Deshjuana Bagley, Associate Dean, A.S. Degree Programs
 """
 
 import os
@@ -15,66 +20,98 @@ import subprocess
 import tempfile
 from config import cfg
 
+# Check for ROS2 audio support
+_ros_available = False
+try:
+    import rclpy
+    _ros_available = True
+except ImportError:
+    pass
 
-def synthesize(text: str, voice_path: str | None = None) -> str:
+
+def synthesize(text: str, voice_path=None) -> str:
     """
     Convert text to a WAV file using Piper TTS.
-
-    Args:
-        text:       The text to speak
-        voice_path: Override the default voice model path from .env
-
-    Returns:
-        Path to the generated WAV file (caller is responsible for cleanup)
-
-    Raises:
-        FileNotFoundError: Voice model .onnx file not found
-        RuntimeError:      Piper synthesis failed
+    Returns path to generated WAV file.
+    Falls back to espeak-ng if Piper not installed.
     """
     model = voice_path or cfg.PIPER_VOICE_PATH
 
-    if not os.path.exists(model):
-        raise FileNotFoundError(
-            f"Piper voice model not found at: {model}\n"
-            "See docs/SETUP.md Step 6 to download a voice model."
-        )
-
-    # Write to a named temp file — caller cleans up
     tmp = tempfile.NamedTemporaryFile(
-        suffix=".wav",
-        prefix="k1_tts_",
-        delete=False,
+        suffix=".wav", prefix="k1_tts_", delete=False
     )
     tmp.close()
     wav_path = tmp.name
 
+    # Try Piper first
+    if os.path.exists(model):
+        try:
+            result = subprocess.run(
+                ["piper", "--model", model, "--output_file", wav_path],
+                input=text.encode("utf-8"),
+                capture_output=True,
+                timeout=30,
+            )
+            if result.returncode == 0:
+                return wav_path
+        except FileNotFoundError:
+            pass  # Piper not installed, fall through to espeak
+
+    # Fallback: espeak-ng (always available on K1)
     try:
+        subprocess.run(
+            ["espeak-ng", "-w", wav_path, text],
+            capture_output=True,
+            timeout=15,
+            check=True,
+        )
+        print("[TTS] Using espeak-ng fallback")
+        return wav_path
+    except Exception as e:
+        raise RuntimeError(f"TTS failed (both Piper and espeak-ng): {e}")
+
+
+def speak_on_robot(wav_path: str) -> bool:
+    """
+    Play a WAV file through the K1 speaker.
+    Since we're running ON the K1, we can play directly via paplay.
+    No SSH/SCP needed.
+    """
+    try:
+        # Try paplay with the K1's USB audio device
         result = subprocess.run(
-            ["piper", "--model", model, "--output_file", wav_path],
-            input=text.encode("utf-8"),
+            [
+                "bash", "-c",
+                f"espeak-ng '' --stdout | paplay "
+                f"--device=alsa_output.usb-C-Media_Electronics_Inc."
+                f"_USB_Audio_Device-00.analog-stereo < {wav_path}"
+            ],
             capture_output=True,
             timeout=30,
         )
-        if result.returncode != 0:
-            raise RuntimeError(
-                f"Piper TTS failed (exit {result.returncode}):\n"
-                f"{result.stderr.decode('utf-8', errors='replace')}"
-            )
-        return wav_path
+        if result.returncode == 0:
+            print("[TTS] Audio played via paplay")
+            return True
 
-    except FileNotFoundError:
-        raise RuntimeError(
-            "piper command not found. "
-            "Install with: pip install piper-tts"
+        # Fallback: aplay
+        subprocess.run(
+            ["aplay", wav_path],
+            capture_output=True,
+            timeout=30,
+            check=True,
         )
-    except subprocess.TimeoutExpired:
-        raise RuntimeError("Piper TTS timed out after 30 seconds.")
+        print("[TTS] Audio played via aplay")
+        return True
+
+    except Exception as e:
+        print(f"[TTS] speak_on_robot error: {e}")
+        return False
 
 
 def cleanup(wav_path: str) -> None:
-    """Delete a temp WAV file after it has been used."""
+    """Delete temp WAV file after playback."""
     try:
         if wav_path and os.path.exists(wav_path):
             os.remove(wav_path)
     except OSError:
-        pass  # Non-critical — file will be cleaned up on next restart
+        pass

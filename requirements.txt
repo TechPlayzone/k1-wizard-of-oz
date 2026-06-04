@@ -16,7 +16,7 @@ openai-whisper>=20231117
 # ffmpeg must be installed separately — see docs/SETUP.md
 
 # ── Piper TTS ─────────────────────────────────────────────────
-piper-tts>=1.2.0
+# piper-tts>=1.2.0  # Linux only — skip on Windows
 
 # ── LLM providers ────────────────────────────────────────────
 # Ollama runs as a local service — no pip package needed
@@ -30,7 +30,7 @@ anthropic>=0.25.0
 openai>=1.12.0
 
 # ── Booster K1 SDK ────────────────────────────────────────────
-booster_robotics_sdk_python>=1.3.6
+# booster_robotics_sdk_python>=1.3.6  # Install manually — see docs/SETUP.md
 
 # ── Audio utilities ───────────────────────────────────────────
 soundfile>=0.12.1
