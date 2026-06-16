@@ -20,6 +20,218 @@
       flex-direction: column;
     }
 
+    /* ── SAFETY MODAL OVERLAY ─────────────────────────── */
+    #safety-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    #safety-overlay.hidden { display: none; }
+
+    .safety-box {
+      background: #fafaf8;
+      border: 3px solid #2c2c2c;
+      max-width: 540px;
+      width: 100%;
+      padding: 2rem;
+      position: relative;
+    }
+    .safety-title {
+      font-family: 'Crimson Text', serif;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      border-bottom: 2px solid #2c2c2c;
+      padding-bottom: 0.4rem;
+    }
+    .safety-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: #666;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .safety-question {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .safety-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 1.2rem;
+    }
+    .safety-opt {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid #d0d0d0;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      text-align: left;
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+    }
+    .safety-opt:hover { border-color: #2c2c2c; background: #f0f0ee; }
+    .safety-opt .opt-icon { font-size: 20px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
+    .safety-opt .opt-text { display: flex; flex-direction: column; gap: 2px; }
+    .safety-opt .opt-label {
+      font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      color: #2c2c2c;
+    }
+    .safety-opt .opt-desc { font-size: 11px; color: #666; line-height: 1.4; }
+
+    /* Unknown / danger state */
+    #safety-unknown-panel {
+      display: none;
+      background: #fff0f0;
+      border: 2px solid #c0392b;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    #safety-unknown-panel.visible { display: block; }
+    .danger-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #c0392b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.6rem;
+    }
+    .danger-steps {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: #2c2c2c;
+      line-height: 1.7;
+      padding-left: 1rem;
+    }
+    .danger-steps li { margin-bottom: 3px; }
+    .danger-warning {
+      margin-top: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #c0392b;
+      line-height: 1.5;
+    }
+    .safety-back {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      background: none;
+      border: 1px solid #aaa;
+      color: #666;
+      padding: 6px 14px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .safety-back:hover { border-color: #2c2c2c; color: #2c2c2c; }
+
+    /* ── EMERGENCY STOP BAR ───────────────────────────── */
+    #estop-bar {
+      flex-shrink: 0;
+      background: #c0392b;
+      padding: 6px 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    #estop-bar .estop-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    #btn-estop {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: #fff;
+      color: #c0392b;
+      border: 2px solid #fff;
+      padding: 5px 22px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .1s, color .1s;
+    }
+    #btn-estop:hover { background: #c0392b; color: #fff; }
+    #btn-estop:active { transform: scale(0.97); }
+
+    /* ── SAFETY WARNING BANNER ────────────────────────── */
+    #safety-banner {
+      flex-shrink: 0;
+      background: #fff8e1;
+      border-bottom: 1px solid #f0d060;
+      padding: 5px 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .banner-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      color: #7a5a00;
+      letter-spacing: 0.3px;
+    }
+    #btn-recheck {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      background: none;
+      border: 1px solid #b08000;
+      color: #7a5a00;
+      padding: 3px 10px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    #btn-recheck:hover { background: #f0d060; }
+
+    /* ── CONTROLS LOCK OVERLAY ────────────────────────── */
+    #controls-lock {
+      position: absolute;
+      inset: 0;
+      background: rgba(250,250,248,0.75);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: all;
+    }
+    #controls-lock.unlocked { display: none; }
+    .lock-msg {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ── PAGE LAYOUT ──────────────────────────────────── */
     .page {
       max-width: 1300px;
       width: 100%;
@@ -27,7 +239,8 @@
       padding: 0.9rem 1.5rem 0.5rem;
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      flex: 1;
+      min-height: 0;
     }
 
     /* ── HEADER ──────────────────────────────────────── */
@@ -66,7 +279,9 @@
     }
     .status-group { display:flex; align-items:center; gap:14px; }
     .status-dot-wrap { display:flex; align-items:center; gap:6px; }
-    .dot { width:7px; height:7px; border-radius:50%; background:#4caf50; flex-shrink:0; }
+    .dot { width:7px; height:7px; border-radius:50%; background:#e0a020; flex-shrink:0; transition: background .3s; }
+    .dot.ok  { background: #4caf50; }
+    .dot.err { background: #c0392b; }
     .ip-tag {
       font-family: 'Inter',sans-serif;
       font-size: 11px;
@@ -81,9 +296,7 @@
       text-decoration: none;
       border-bottom: 1px solid #2c5aa0;
       font-size: 12px;
-      transition: color .2s;
     }
-    .booster-link:hover { color: #1a3a5c; }
 
     /* ── 3-COLUMN GRID ───────────────────────────────── */
     main {
@@ -99,6 +312,7 @@
       display: flex;
       flex-direction: column;
       min-height: 0;
+      position: relative;
     }
     .col-title {
       font-family: 'Crimson Text',serif;
@@ -139,12 +353,16 @@
       flex: 1;
     }
     button:hover { background:#2c2c2c; color:#fafaf8; }
+    button:disabled { opacity: 0.35; cursor: not-allowed; }
+    button:disabled:hover { background: transparent; color: #2c2c2c; }
     button.sec { border-color:#aaa; color:#666; }
     button.sec:hover { background:#666; color:#fafaf8; }
     button.green { border-color:#3a8a3a; color:#3a8a3a; }
     button.green:hover { background:#3a8a3a; color:#fff; }
     button.active-dark { background:#2c2c2c; color:#fafaf8; }
     button.active-green { background:#3a8a3a; color:#fff; border-color:#3a8a3a; }
+    button.warn { border-color:#b06000; color:#b06000; }
+    button.warn:hover { background:#b06000; color:#fff; }
 
     /* ── INPUTS / SELECTS ────────────────────────────── */
     select, textarea, input[type="text"], input[type="password"] {
@@ -170,10 +388,6 @@
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance:none; width:13px; height:13px;
       border-radius:50%; background:#2c2c2c; cursor:pointer;
-    }
-    input[type="range"]::-moz-range-thumb {
-      width:13px; height:13px; border-radius:50%;
-      background:#2c2c2c; cursor:pointer; border:none;
     }
     .sl-val {
       font-family:'Inter',sans-serif;
@@ -233,16 +447,12 @@
       border:1px solid #d8d8d5;
       background:#fff;
     }
-
-    /* LLM selector bar */
     .llm-bar {
       flex-shrink:0;
       padding:0.55rem 0.75rem 0;
       border-bottom:1px solid #e8e8e5;
     }
-    .llm-pills {
-      display:flex; gap:0; margin-bottom:0.5rem;
-    }
+    .llm-pills { display:flex; gap:0; margin-bottom:0.5rem; }
     .llm-pill {
       flex:1; padding:6px 4px;
       font-family:'Inter',sans-serif;
@@ -261,21 +471,14 @@
       margin-bottom:0.5rem;
       align-items:center;
     }
-    .api-key-row input {
-      flex:1; font-family:'Inter',sans-serif;
-      font-size:11px; padding:5px 8px;
-    }
-    .api-key-row button {
-      flex:none; padding:5px 10px;
-      font-size:10px;
-    }
+    .api-key-row input { flex:1; font-family:'Inter',sans-serif; font-size:11px; padding:5px 8px; }
+    .api-key-row button { flex:none; padding:5px 10px; font-size:10px; }
     .session-note {
       font-family:'Inter',sans-serif;
       font-size:9px; color:#aaa;
       margin-bottom:0.4rem; letter-spacing:.2px;
     }
 
-    /* chat messages */
     .chat-history {
       flex:1; overflow-y:auto;
       padding:0.7rem 0.75rem;
@@ -289,30 +492,21 @@
     }
     .cm.user .who { color:#2c5aa0; }
     .cm.robot .who { color:#3a6e3a; }
-    .cm .bub {
-      font-size:12px; line-height:1.5; color:#2c2c2c;
-      padding:7px 10px;
-    }
-    .cm.user .bub { background:#f0f4fb; }
+    .cm .bub { font-size:12px; line-height:1.5; color:#2c2c2c; padding:7px 10px; }
+    .cm.user  .bub { background:#f0f4fb; }
     .cm.robot .bub { background:#f3f7f3; font-style:italic; }
+    .cm.error .bub { background:#fff0f0; color:#c0392b; font-style:normal; }
 
     .chat-sep { border:none; border-top:1px solid #e8e8e5; flex-shrink:0; }
     .chat-foot {
       flex-shrink:0; padding:0.65rem 0.75rem;
       display:flex; flex-direction:column; gap:6px;
     }
-    textarea.msg-in {
-      resize:none; min-height:52px; max-height:80px;
-      font-size:13px; line-height:1.4;
-    }
+    textarea.msg-in { resize:none; min-height:52px; max-height:80px; font-size:13px; line-height:1.4; }
     .chat-btns { display:flex; gap:7px; }
 
     /* ── RIGHT: LIVE PANE ────────────────────────────── */
-
-    /* Real / Isaac toggle */
-    .view-toggle {
-      display:flex; gap:0; margin-bottom:0.65rem; flex-shrink:0;
-    }
+    .view-toggle { display:flex; gap:0; margin-bottom:0.65rem; flex-shrink:0; }
     .vt-btn {
       flex:1; padding:7px 6px;
       font-family:'Inter',sans-serif;
@@ -326,7 +520,6 @@
     .vt-btn:hover { background:#f0f0ee; color:#2c2c2c; }
     .vt-btn.active { background:#2c2c2c; color:#fafaf8; border-color:#2c2c2c; }
 
-    /* camera / sim viewport */
     .view-port {
       border:1px solid #d0d0d0;
       background:#111;
@@ -353,42 +546,20 @@
       padding:1.2rem;
     }
     .isaac-placeholder.visible { display:flex; }
-    .isaac-logo {
-      font-family:'Inter',sans-serif;
-      font-size:13px; font-weight:600;
-      color:#76b900; letter-spacing:1px;
-      text-transform:uppercase;
-    }
-    .isaac-info {
-      font-family:'Inter',sans-serif;
-      font-size:10px; color:#666;
-      text-align:center; line-height:1.5;
-    }
-    .isaac-url {
-      font-family:'Inter',sans-serif;
-      font-size:10px; color:#999;
-      background:#1e1e1e;
-      padding:4px 10px;
-      letter-spacing:.3px;
-    }
-    .isaac-connect {
-      padding:7px 18px;
-      font-family:'Inter',sans-serif;
-      font-size:10px; font-weight:600;
-      text-transform:uppercase; letter-spacing:.5px;
-      border:1px solid #76b900;
-      background:transparent; color:#76b900;
-      cursor:pointer; transition:all .15s; flex:none;
-    }
+    .isaac-logo { font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:#76b900; letter-spacing:1px; text-transform:uppercase; }
+    .isaac-info { font-family:'Inter',sans-serif; font-size:10px; color:#666; text-align:center; line-height:1.5; }
+    .isaac-url { font-family:'Inter',sans-serif; font-size:10px; color:#999; background:#1e1e1e; padding:4px 10px; letter-spacing:.3px; }
+    .isaac-connect { padding:7px 18px; font-family:'Inter',sans-serif; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; border:1px solid #76b900; background:transparent; color:#76b900; cursor:pointer; transition:all .15s; flex:none; }
     .isaac-connect:hover { background:#76b900; color:#111; }
 
-    /* robot status strip */
+    /* ── ROBOT STATUS STRIP ───────────────────────────── */
     .status-strip {
       flex:1; min-height:0;
       display:flex; flex-direction:column;
       border:1px solid #d8d8d5;
       background:#fff;
       margin-top:0.75rem;
+      overflow-y: auto;
     }
     .status-strip-title {
       font-family:'Inter',sans-serif;
@@ -399,19 +570,36 @@
       flex-shrink:0;
     }
     .status-rows { padding:0.5rem 0.7rem; display:flex; flex-direction:column; gap:0.5rem; }
-    .sr {
-      display:flex; justify-content:space-between; align-items:center;
-      font-family:'Inter',sans-serif; font-size:11px;
-    }
+    .sr { display:flex; justify-content:space-between; align-items:center; font-family:'Inter',sans-serif; font-size:11px; }
     .sr-key { color:#999; font-size:10px; text-transform:uppercase; letter-spacing:.3px; }
     .sr-val { color:#2c2c2c; font-weight:600; }
-    .sr-val.ok { color:#3a8a3a; }
+    .sr-val.ok   { color:#3a8a3a; }
     .sr-val.warn { color:#b06000; }
-    .sr-val.action {
-      color:#2c5aa0;
-      font-style:italic;
-      font-weight:400;
+    .sr-val.err  { color:#c0392b; }
+    .sr-val.action { color:#2c5aa0; font-style:italic; font-weight:400; }
+
+    /* ── TOAST NOTIFICATION ───────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2c2c2c;
+      color: #fafaf8;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      padding: 8px 20px;
+      letter-spacing: 0.3px;
+      z-index: 8000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      max-width: 400px;
+      text-align: center;
     }
+    #toast.err  { background: #c0392b; }
+    #toast.warn { background: #b06000; }
+    #toast.show { opacity: 1; }
 
     /* ── FOOTER ──────────────────────────────────────── */
     footer {
@@ -425,6 +613,104 @@
   </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════════════════
+     SAFETY MODAL — shown on load, blocks all controls
+══════════════════════════════════════════════════════════ -->
+<div id="safety-overlay">
+  <div class="safety-box">
+    <div class="safety-title">⚠ Safety Check Required</div>
+    <div class="safety-sub">K1 Wizard-of-Oz Dashboard · AI Innovation Center</div>
+
+    <div id="safety-question-panel">
+      <div class="safety-question">
+        Before controls are unlocked — what is K1's current physical position and mode?
+      </div>
+      <div class="safety-options">
+
+        <button class="safety-opt" onclick="confirmSafety('damp_floor')">
+          <span class="opt-icon">🟢</span>
+          <div class="opt-text">
+            <span class="opt-label">Lying face-down on the floor (Damp)</span>
+            <span class="opt-desc">Robot is powered on, motors relaxed, lying safely on the floor face-down. Ready to Prep.</span>
+          </div>
+        </button>
+
+        <button class="safety-opt" onclick="confirmSafety('prep')">
+          <span class="opt-icon">🟡</span>
+          <div class="opt-text">
+            <span class="opt-label">Kneeling / Stiffened (Prep mode)</span>
+            <span class="opt-desc">Robot is stiff and upright but not fully standing. Ready to Walk.</span>
+          </div>
+        </button>
+
+        <button class="safety-opt" onclick="confirmSafety('walk')">
+          <span class="opt-icon">🔵</span>
+          <div class="opt-text">
+            <span class="opt-label">Standing upright (Walk mode)</span>
+            <span class="opt-desc">Robot is fully standing and stable. Movement and gestures available.</span>
+          </div>
+        </button>
+
+        <button class="safety-opt" onclick="showUnknownWarning()" style="border-color:#c0392b;">
+          <span class="opt-icon">🔴</span>
+          <div class="opt-text">
+            <span class="opt-label">I don't know the robot's current state</span>
+            <span class="opt-desc">Show me what to do before touching the robot.</span>
+          </div>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Unknown state — danger instructions -->
+    <div id="safety-unknown-panel">
+      <div class="danger-title">🚨 STOP — DO NOT TOUCH THE ROBOT YET</div>
+      <div class="danger-warning" style="margin-bottom:0.7rem;">
+        If K1 is in Walk mode and you touch or move it, it may react and injure you.
+      </div>
+      <ol class="danger-steps">
+        <li><strong>Look at K1 from a safe distance.</strong> Is it standing or moving? Do NOT approach.</li>
+        <li><strong>Do NOT touch the robot</strong> until it is completely still.</li>
+        <li><strong>Locate the power button.</strong> Power off from a safe distance without grabbing the robot.</li>
+        <li>Once powered off, <strong>carefully lay K1 face-down on the floor.</strong></li>
+        <li>Power back on. Wait for the <strong>startup tone and green indicator light.</strong></li>
+        <li>Robot will start in <strong>Damp mode</strong> — motors relaxed, lying on the floor. Safe to proceed.</li>
+        <li>Return here and select <em>"Lying face-down on the floor (Damp)"</em>.</li>
+      </ol>
+      <div class="danger-warning">
+        🚨 If the robot is moving and you cannot safely reach the power button —
+        call for assistance immediately. Do not attempt to stop it manually.
+      </div>
+      <button class="safety-back" onclick="hideUnknownWarning()">← Back to options</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     EMERGENCY STOP BAR — always visible at top
+══════════════════════════════════════════════════════════ -->
+<div id="estop-bar">
+  <span class="estop-label">🚨 Emergency Stop</span>
+  <button id="btn-estop" onclick="emergencyStop()">■ STOP ALL MOVEMENT</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SAFETY BANNER — permanent reminder below E-stop
+══════════════════════════════════════════════════════════ -->
+<div id="safety-banner">
+  <span class="banner-text">
+    ⚠ Always ensure a clear area around K1 before movement. 
+    If robot state is uncertain — use Emergency Stop, then power off before approaching.
+  </span>
+  <button id="btn-recheck" onclick="recheckSafety()">Re-check State</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN PAGE
+══════════════════════════════════════════════════════════ -->
+<div style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;">
 <div class="page">
 
   <!-- HEADER -->
@@ -436,10 +722,10 @@
     <div class="hd-meta">
       <div class="status-group">
         <div class="status-dot-wrap">
-          <div class="dot"></div>
-          <span>Robot connected</span>
+          <div class="dot" id="conn-dot"></div>
+          <span id="conn-text">Connecting...</span>
         </div>
-        <div class="ip-tag">192.168.0.176</div>
+        <div class="ip-tag" id="ip-tag">—</div>
       </div>
       <a href="https://docs.boosterrobotics.com/" target="_blank" class="booster-link">Booster firmware manual</a>
     </div>
@@ -452,34 +738,41 @@
     ═════════════════════════════════════════ -->
     <section class="col">
       <div class="col-title">Controls</div>
+
+      <!-- Controls lock overlay -->
+      <div id="controls-lock">
+        <div class="lock-msg">🔒 Confirm robot<br>position to unlock</div>
+      </div>
+
       <div class="left-scroll">
 
+        <!-- Movement -->
         <span class="lbl">Movement</span>
         <div class="move-pad">
           <div></div>
           <div class="mc">
-            <button class="mb">↑</button>
-            <div class="ml">Walk forward</div>
+            <button class="mb" id="btn-fwd"  onclick="move('walk_forward')">↑</button>
+            <div class="ml">Forward</div>
           </div>
           <div></div>
 
           <div class="mc">
-            <button class="mb">←</button>
+            <button class="mb" id="btn-left"  onclick="move('turn_left')">←</button>
             <div class="ml">Turn left</div>
           </div>
           <div class="mc">
-            <button class="mb">◎</button>
+            <button class="mb" id="btn-stop2" onclick="move('stop')">◎</button>
             <div class="ml">Stop</div>
           </div>
           <div class="mc">
-            <button class="mb">→</button>
+            <button class="mb" id="btn-right" onclick="move('turn_right')">→</button>
             <div class="ml">Turn right</div>
           </div>
 
           <div></div>
           <div class="mc">
-            <button class="mb">↓</button>
-            <div class="ml">Walk backward</div>
+            <button class="mb" id="btn-back"  onclick="move('walk_backward')">↓</button>
+            <div class="ml">Backward</div>
           </div>
           <div></div>
         </div>
@@ -490,8 +783,7 @@
         <span class="lbl">Gestures</span>
         <div class="gest-grid">
 
-          <!-- Wave -->
-          <button class="gb">
+          <button class="gb" onclick="gesture('wave')">
             <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
               <circle cx="20" cy="7" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
               <line x1="20" y1="12" x2="20" y2="30" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
@@ -499,17 +791,13 @@
               <line x1="20" y1="17" x2="12" y2="24" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
               <line x1="20" y1="30" x2="15" y2="44" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
               <line x1="20" y1="30" x2="25" y2="44" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M34 3 Q36 1 38 3" stroke="#2c2c2c" stroke-width="1" stroke-linecap="round" fill="none"/>
-              <path d="M32 1 Q35 -1 37 1" stroke="#2c2c2c" stroke-width="1" stroke-linecap="round" fill="none"/>
             </svg>
             <span>Wave</span>
           </button>
 
-          <!-- Nod -->
-          <button class="gb">
+          <button class="gb" onclick="gesture('nod')">
             <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
               <circle cx="20" cy="9" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
-              <path d="M15 9 Q15 4 20 4" stroke="#2c2c2c" stroke-width="1" stroke-linecap="round" fill="none"/>
               <polygon points="20,2 18,5 22,5" fill="#2c2c2c"/>
               <line x1="20" y1="14" x2="20" y2="31" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
               <line x1="20" y1="18" x2="11" y2="25" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
@@ -520,8 +808,7 @@
             <span>Nod</span>
           </button>
 
-          <!-- Thumbs up -->
-          <button class="gb">
+          <button class="gb" onclick="gesture('thumbs_up')">
             <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
               <circle cx="20" cy="7" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
               <line x1="20" y1="12" x2="20" y2="30" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
@@ -538,31 +825,29 @@
 
         <hr class="sep">
 
-        <!-- Mode -->
+        <!-- Robot Mode -->
         <span class="lbl">Robot mode</span>
-        <div style="display:flex;gap:6px;margin-bottom:0.6rem;">
-          <button class="green" id="btn-walk" onclick="setMode('walk')" style="flex:1;">Walk</button>
-          <button class="sec"   id="btn-damp" onclick="setMode('damp')" style="flex:1;">Damp</button>
+        <div style="display:flex;gap:6px;margin-bottom:0.5rem;">
+          <button id="btn-prep" class="warn" onclick="setMode('prep')" style="flex:1;">Prep</button>
+          <button id="btn-walk" class="green" onclick="setMode('walk')" style="flex:1;">Walk</button>
+          <button id="btn-damp" class="sec"   onclick="setMode('damp')" style="flex:1;">Damp</button>
+        </div>
+        <div style="font-family:'Inter',sans-serif;font-size:9px;color:#aaa;margin-bottom:0.6rem;line-height:1.5;">
+          Sequence: Damp → Prep → Walk. Never skip steps.
         </div>
 
         <!-- Voice -->
         <span class="lbl">Voice</span>
         <div style="position:relative;margin-bottom:0.6rem;">
-          <select>
+          <select id="voice-sel">
             <optgroup label="Piper TTS — local">
-              <option>Lessac · US male (default)</option>
-              <option>Amy · US female</option>
-              <option>Kathleen · US female</option>
-              <option>Ryan · US male</option>
-              <option>Danny · US male, deep</option>
-              <option>Alan · British male</option>
-              <option>Cori · British female</option>
-            </optgroup>
-            <optgroup label="OpenAI TTS — API key required">
-              <option>Nova · warm female</option>
-              <option>Alloy · neutral</option>
-              <option>Echo · male</option>
-              <option>Shimmer · soft female</option>
+              <option value="en_US-lessac-medium">Lessac · US male (default)</option>
+              <option value="en_US-amy-low">Amy · US female</option>
+              <option value="en_US-kathleen-low">Kathleen · US female</option>
+              <option value="en_US-ryan-medium">Ryan · US male</option>
+              <option value="en_US-danny-low">Danny · US male, deep</option>
+              <option value="en_GB-alan-medium">Alan · British male</option>
+              <option value="en_GB-cori-high">Cori · British female</option>
             </optgroup>
           </select>
           <svg style="position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="#666" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
@@ -610,69 +895,49 @@
         </div>
 
         <!-- Chat history -->
-        <div class="chat-history" id="chat-history">
-          <div class="cm user">
-            <div class="who">You</div>
-            <div class="bub">What is your name?</div>
-          </div>
-          <div class="cm robot">
-            <div class="who">K1 · Ollama / Llama 3</div>
-            <div class="bub">I am K1, a humanoid robot at Hillsborough College's AI Innovation Center. I'm here to help demonstrate the integration of large language models with physical robotics. How can I help you today?</div>
-          </div>
-          <div class="cm user">
-            <div class="who">You</div>
-            <div class="bub">Can you wave hello to everyone?</div>
-          </div>
-          <div class="cm robot">
-            <div class="who">K1 · Ollama / Llama 3</div>
-            <div class="bub">Of course! Hello everyone, welcome to the AI Innovation Center! [ACTION: wave]</div>
-          </div>
-        </div>
+        <div class="chat-history" id="chat-history"></div>
 
         <hr class="chat-sep">
 
         <!-- Input -->
         <div class="chat-foot">
-          <textarea class="msg-in" id="msg-in" placeholder="Type a message or command for K1…"></textarea>
+          <textarea class="msg-in" id="msg-in" placeholder="Type a message for K1…"></textarea>
           <div class="chat-btns">
-            <button style="flex:2" onclick="sendMsg()">Send</button>
+            <button style="flex:2" id="btn-send" onclick="sendMsg()">Send</button>
             <button class="sec" style="flex:1" onclick="clearChat()">Clear</button>
           </div>
         </div>
+
       </div>
     </section>
 
     <!-- ════════════════════════════════════════
-         RIGHT — Live
+         RIGHT — Live + Status
     ═════════════════════════════════════════ -->
     <section class="col">
       <div class="col-title">Live</div>
 
-      <!-- Real / Isaac toggle -->
       <div class="view-toggle">
         <button class="vt-btn active" id="vt-real"  onclick="setView('real')">Real camera</button>
         <button class="vt-btn"        id="vt-isaac" onclick="setView('isaac')">Isaac sim</button>
       </div>
 
-      <!-- Viewport -->
       <div class="view-port">
-        <!-- Real camera placeholder -->
         <div class="cam-placeholder" id="cam-real">
           <svg width="36" height="28" viewBox="0 0 36 28" fill="none" opacity=".35">
             <rect x="1" y="5" width="34" height="22" rx="3" stroke="#fff" stroke-width="1.5"/>
             <circle cx="18" cy="16" r="7" stroke="#fff" stroke-width="1.5"/>
             <circle cx="18" cy="16" r="3" stroke="#fff" stroke-width="1"/>
             <path d="M12 5V3a2 2 0 012-2h8a2 2 0 012 2v2" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-            <circle cx="29" cy="9" r="1.5" fill="#fff"/>
           </svg>
           <span>Live Camera Feed</span>
         </div>
+        <img id="cam-stream" src="" alt="K1 Camera" style="display:none;width:100%;height:100%;object-fit:cover;">
 
-        <!-- Isaac Sim placeholder -->
         <div class="isaac-placeholder" id="cam-isaac">
           <div class="isaac-logo">NVIDIA Isaac Sim</div>
           <div class="isaac-info">Streaming from your inference server.<br>Make sure Isaac Sim is running with<br>WebRTC streaming enabled.</div>
-          <div class="isaac-url">http://192.168.0.100:8211/streaming</div>
+          <div class="isaac-url" id="isaac-url">http://192.168.0.100:8211/streaming</div>
           <button class="isaac-connect" onclick="launchIsaac()">Connect to simulator</button>
         </div>
       </div>
@@ -682,16 +947,16 @@
         <div class="status-strip-title">Robot status</div>
         <div class="status-rows">
           <div class="sr">
+            <span class="sr-key">Safety</span>
+            <span class="sr-val warn" id="st-safety">Pending</span>
+          </div>
+          <div class="sr">
             <span class="sr-key">Mode</span>
-            <span class="sr-val ok" id="st-mode">Walk</span>
+            <span class="sr-val" id="st-mode">—</span>
           </div>
           <div class="sr">
             <span class="sr-key">Battery</span>
-            <span class="sr-val ok" id="st-batt">87%</span>
-          </div>
-          <div class="sr">
-            <span class="sr-key">Latency</span>
-            <span class="sr-val" id="st-lat">24 ms</span>
+            <span class="sr-val" id="st-batt">—</span>
           </div>
           <div class="sr">
             <span class="sr-key">LLM provider</span>
@@ -699,7 +964,7 @@
           </div>
           <div class="sr">
             <span class="sr-key">Last action</span>
-            <span class="sr-val action" id="st-action">wave executed</span>
+            <span class="sr-val action" id="st-action">—</span>
           </div>
           <div class="sr">
             <span class="sr-key">View</span>
@@ -711,81 +976,392 @@
 
   </main>
 
-  <footer>K1 Wizard of Oz Dashboard &nbsp;·&nbsp; Hillsborough College AI Innovation Center &nbsp;·&nbsp; FIPSE Grant Program</footer>
+  <footer>K1 Wizard of Oz Dashboard &nbsp;·&nbsp; Hillsborough College AI Innovation Center &nbsp;·&nbsp; FIPSE Grant Program &nbsp;·&nbsp; AI PREP4WORK Initiative</footer>
+</div>
 </div>
 
+<!-- Toast -->
+<div id="toast"></div>
+
 <script>
-  /* ── Sliders ── */
-  const volR = document.getElementById('vol-r');
-  const volV = document.getElementById('vol-v');
-  const spdR = document.getElementById('spd-r');
-  const spdV = document.getElementById('spd-v');
-  const spdL = ['','Very slow','Slow','Slower','Moderate','Normal','Quick','Fast','Very fast','Rapid','Immediate'];
-  volR.addEventListener('input', e => { volV.textContent = Math.round(e.target.value) + '%'; });
-  spdR.addEventListener('input', e => { spdV.textContent = spdL[Math.round(e.target.value)]; });
+// ── Config ────────────────────────────────────────────────────
+const FLASK      = 'http://localhost:5000';
+const SESSION_ID = 'woz-' + Math.random().toString(36).slice(2, 9);
+let   currentLLM = 'ollama';
+let   safetyConfirmed = false;
 
-  /* ── Robot mode ── */
-  function setMode(m) {
-    document.getElementById('btn-walk').className = m === 'walk' ? 'green' : 'sec';
-    document.getElementById('btn-damp').className = m === 'damp' ? 'active-dark' : 'sec';
-    document.getElementById('st-mode').textContent = m === 'walk' ? 'Walk' : 'Damp';
-    document.getElementById('st-mode').className   = m === 'walk' ? 'sr-val ok' : 'sr-val warn';
-  }
+// ── Toast ─────────────────────────────────────────────────────
+let _toastTimer = null;
+function toast(msg, type = '', duration = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'show' + (type ? ' ' + type : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.className = ''; }, duration);
+}
 
-  /* ── LLM selector ── */
-  let currentLLM = 'ollama';
-  const llmLabels = { ollama:'Ollama / Llama 3', anthropic:'Anthropic / Claude', openai:'OpenAI / GPT-4o' };
+// ── Safety Modal ──────────────────────────────────────────────
+function showUnknownWarning() {
+  document.getElementById('safety-question-panel').style.display = 'none';
+  document.getElementById('safety-unknown-panel').classList.add('visible');
+}
+function hideUnknownWarning() {
+  document.getElementById('safety-question-panel').style.display = 'block';
+  document.getElementById('safety-unknown-panel').classList.remove('visible');
+}
 
-  function selectLLM(p) {
-    currentLLM = p;
-    ['ollama','anthropic','openai'].forEach(id => {
-      document.getElementById('pill-' + id).classList.toggle('active', id === p);
+async function confirmSafety(position) {
+  try {
+    const r = await fetch(`${FLASK}/api/safety/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ position })
     });
-    document.getElementById('api-key-area').style.display = (p === 'ollama') ? 'none' : 'block';
-    document.getElementById('st-llm').textContent = llmLabels[p];
+    const d = await r.json();
+
+    if (d.confirmed) {
+      safetyConfirmed = true;
+      document.getElementById('safety-overlay').classList.add('hidden');
+      document.getElementById('controls-lock').classList.add('unlocked');
+      document.getElementById('st-safety').textContent = 'Confirmed ✓';
+      document.getElementById('st-safety').className   = 'sr-val ok';
+      toast('Safety confirmed. Controls unlocked.');
+      pollStatus();
+    }
+  } catch(e) {
+    // Server not reachable — allow local-only unlock so dashboard is usable
+    safetyConfirmed = true;
+    document.getElementById('safety-overlay').classList.add('hidden');
+    document.getElementById('controls-lock').classList.add('unlocked');
+    document.getElementById('st-safety').textContent = 'Confirmed (offline)';
+    document.getElementById('st-safety').className   = 'sr-val warn';
+    toast('Server unreachable — running in offline mode.', 'warn');
   }
+}
 
-  function applyKey()  { document.getElementById('api-key-input').style.borderColor = '#3a8a3a'; }
-  function clearKey()  {
-    document.getElementById('api-key-input').value = '';
-    document.getElementById('api-key-input').style.borderColor = '';
+function recheckSafety() {
+  safetyConfirmed = false;
+  document.getElementById('safety-overlay').classList.remove('hidden');
+  document.getElementById('controls-lock').classList.remove('unlocked');
+  document.getElementById('safety-question-panel').style.display = 'block';
+  document.getElementById('safety-unknown-panel').classList.remove('visible');
+  document.getElementById('st-safety').textContent = 'Pending';
+  document.getElementById('st-safety').className   = 'sr-val warn';
+  fetch(`${FLASK}/api/safety/reset`, { method: 'POST' }).catch(() => {});
+}
+
+// ── Emergency Stop ────────────────────────────────────────────
+async function emergencyStop() {
+  document.getElementById('btn-estop').textContent = '⏳ STOPPING...';
+  try {
+    // Send stop move command
+    await fetch(`${FLASK}/api/move`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: 'stop' })
+    });
+    // Also send damp to drop motors
+    await fetch(`${FLASK}/api/mode`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'damp' })
+    });
+    toast('Emergency stop sent — robot dampened.', 'warn', 5000);
+    updateModeUI('damp');
+  } catch(e) {
+    toast('E-stop: server unreachable. Power off robot manually.', 'err', 8000);
+  } finally {
+    document.getElementById('btn-estop').textContent = '■ STOP ALL MOVEMENT';
   }
+}
 
-  /* ── Chat ── */
-  function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  function sendMsg() {
-    const inp = document.getElementById('msg-in');
-    const t = inp.value.trim();
-    if (!t) return;
-    const h = document.getElementById('chat-history');
-    const d = document.createElement('div');
-    d.className = 'cm user';
-    d.innerHTML = '<div class="who">You</div><div class="bub">' + esc(t) + '</div>';
-    h.appendChild(d);
-    inp.value = '';
-    h.scrollTop = h.scrollHeight;
+// ── Mode Control ──────────────────────────────────────────────
+async function setMode(m) {
+  if (!safetyConfirmed) { toast('Confirm robot position first.', 'err'); return; }
+  toast(`Sending ${m.toUpperCase()} command…`);
+  try {
+    const r = await fetch(`${FLASK}/api/mode`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: m })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      updateModeUI(d.mode);
+      toast(`Mode: ${d.mode.toUpperCase()}`);
+    } else {
+      toast(d.error + (d.detail ? ' — ' + d.detail : ''), 'err', 6000);
+    }
+  } catch(e) {
+    toast('Server unreachable.', 'err');
   }
+}
 
-  function clearChat() { document.getElementById('chat-history').innerHTML = ''; }
+function updateModeUI(mode) {
+  const modeEl = document.getElementById('st-mode');
+  modeEl.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
+  modeEl.className   = mode === 'walk' ? 'sr-val ok' : mode === 'prep' ? 'sr-val warn' : 'sr-val';
+  document.getElementById('btn-prep').className = mode === 'prep' ? 'warn active-dark' : 'warn';
+  document.getElementById('btn-walk').className = mode === 'walk' ? 'active-green'    : 'green';
+  document.getElementById('btn-damp').className = mode === 'damp' ? 'active-dark'     : 'sec';
+}
 
-  document.getElementById('msg-in').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+// ── Movement ──────────────────────────────────────────────────
+async function move(command) {
+  if (!safetyConfirmed) { toast('Confirm robot position first.', 'err'); return; }
+  try {
+    const r = await fetch(`${FLASK}/api/move`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command })
+    });
+    const d = await r.json();
+    if (!d.ok) {
+      toast(d.error + (d.detail ? ' — ' + d.detail : ''), 'err', 5000);
+    } else {
+      document.getElementById('st-action').textContent = command.replace('_', ' ');
+    }
+  } catch(e) {
+    toast('Server unreachable.', 'err');
+  }
+}
+
+// ── Gestures ──────────────────────────────────────────────────
+async function gesture(name) {
+  if (!safetyConfirmed) { toast('Confirm robot position first.', 'err'); return; }
+  try {
+    const r = await fetch(`${FLASK}/api/gesture`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ gesture: name })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      document.getElementById('st-action').textContent = name + ' executed';
+      toast(`Gesture: ${name}`);
+    } else {
+      toast(d.error, 'err');
+    }
+  } catch(e) {
+    toast('Server unreachable.', 'err');
+  }
+}
+
+// ── LLM / Chat ────────────────────────────────────────────────
+const llmLabels = {
+  ollama:    'Ollama / Llama 3',
+  anthropic: 'Anthropic / Claude',
+  openai:    'OpenAI / GPT-4o'
+};
+
+function selectLLM(p) {
+  currentLLM = p;
+  ['ollama','anthropic','openai'].forEach(id => {
+    document.getElementById('pill-' + id).classList.toggle('active', id === p);
   });
+  document.getElementById('api-key-area').style.display = (p === 'ollama') ? 'none' : 'block';
+  document.getElementById('st-llm').textContent = llmLabels[p];
+}
 
-  /* ── View toggle (Real / Isaac) ── */
-  function setView(v) {
-    document.getElementById('vt-real').classList.toggle('active',  v === 'real');
-    document.getElementById('vt-isaac').classList.toggle('active', v === 'isaac');
-    document.getElementById('cam-real').style.display  = v === 'real'  ? 'flex' : 'none';
-    const ip = document.getElementById('cam-isaac');
-    ip.classList.toggle('visible', v === 'isaac');
-    document.getElementById('st-view').textContent = v === 'real' ? 'Real camera' : 'Isaac sim';
+async function applyKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) { toast('No key entered.', 'err'); return; }
+  try {
+    await fetch(`${FLASK}/api/session/key`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: SESSION_ID, provider: currentLLM, key })
+    });
+    document.getElementById('api-key-input').style.borderColor = '#3a8a3a';
+    toast(`${currentLLM} key stored in memory.`);
+  } catch(e) {
+    toast('Server unreachable.', 'err');
   }
+}
 
-  function launchIsaac() {
-    window.open('http://192.168.0.100:8211/streaming/webrtc-demo/?server=192.168.0.100','_blank');
+async function clearKey() {
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('api-key-input').style.borderColor = '';
+  try {
+    await fetch(`${FLASK}/api/session/key`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: SESSION_ID, provider: currentLLM })
+    });
+  } catch(e) {}
+  toast(`${currentLLM} key cleared.`);
+}
+
+function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function now()  { return new Date().toLocaleTimeString('en-US', { hour12: false }); }
+
+function addMsg(role, text, label) {
+  const h   = document.getElementById('chat-history');
+  const div = document.createElement('div');
+  div.className = `cm ${role}`;
+  const who = role === 'user' ? 'You' : (label || 'K1 · ' + llmLabels[currentLLM]);
+  div.innerHTML = `<div class="who">${who}</div><div class="bub">${esc(text)}</div>`;
+  h.appendChild(div);
+  h.scrollTop = h.scrollHeight;
+}
+
+function addThinking() {
+  const h   = document.getElementById('chat-history');
+  const div = document.createElement('div');
+  div.className = 'cm robot';
+  div.id = 'thinking-bubble';
+  div.innerHTML = `<div class="who">K1</div><div class="bub" style="color:#aaa;font-style:normal;">Thinking…</div>`;
+  h.appendChild(div);
+  h.scrollTop = h.scrollHeight;
+}
+
+async function sendMsg() {
+  const inp  = document.getElementById('msg-in');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+  addMsg('user', text);
+  addThinking();
+  document.getElementById('btn-send').disabled = true;
+
+  try {
+    const r = await fetch(`${FLASK}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message:    text,
+        provider:   currentLLM,
+        session_id: SESSION_ID
+      })
+    });
+    const d = await r.json();
+    const thinking = document.getElementById('thinking-bubble');
+    if (thinking) thinking.remove();
+
+    if (d.error) {
+      addMsg('error', '⚠ ' + d.error);
+    } else {
+      addMsg('robot', d.response);
+      if (d.action) {
+        document.getElementById('st-action').textContent = d.action + ' executed';
+        toast(`Action: ${d.action}`);
+      }
+      if (d.speak_error) {
+        toast('TTS error: ' + d.speak_error, 'warn');
+      }
+    }
+  } catch(e) {
+    const thinking = document.getElementById('thinking-bubble');
+    if (thinking) thinking.remove();
+    addMsg('error', '⚠ Server unreachable — is app.py running?');
+  } finally {
+    document.getElementById('btn-send').disabled = false;
   }
+}
+
+async function clearChat() {
+  document.getElementById('chat-history').innerHTML = '';
+  try {
+    await fetch(`${FLASK}/api/chat/reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: SESSION_ID })
+    });
+  } catch(e) {}
+}
+
+document.getElementById('msg-in').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+
+// ── Camera / View Toggle ──────────────────────────────────────
+let cameraActive = false;
+
+function setView(v) {
+  document.getElementById('vt-real').classList.toggle('active',  v === 'real');
+  document.getElementById('vt-isaac').classList.toggle('active', v === 'isaac');
+  document.getElementById('st-view').textContent = v === 'real' ? 'Real camera' : 'Isaac sim';
+
+  const realPlaceholder = document.getElementById('cam-real');
+  const stream          = document.getElementById('cam-stream');
+  const isaac           = document.getElementById('cam-isaac');
+
+  if (v === 'real') {
+    isaac.classList.remove('visible');
+    if (!cameraActive) {
+      // Try to load camera stream
+      stream.src = `${FLASK}/api/camera/stream`;
+      stream.onload  = () => { realPlaceholder.style.display = 'none'; stream.style.display = 'block'; cameraActive = true; };
+      stream.onerror = () => { realPlaceholder.style.display = 'flex'; stream.style.display = 'none'; };
+    }
+  } else {
+    realPlaceholder.style.display = 'flex';
+    stream.style.display = 'none';
+    stream.src = '';
+    cameraActive = false;
+    isaac.classList.add('visible');
+  }
+}
+
+function launchIsaac() {
+  const url = document.getElementById('isaac-url').textContent;
+  window.open(url + '/webrtc-demo/?server=192.168.0.100', '_blank');
+}
+
+// ── Status Poll ───────────────────────────────────────────────
+async function pollStatus() {
+  try {
+    const r = await fetch(`${FLASK}/health`, { signal: AbortSignal.timeout(4000) });
+    const d = await r.json();
+
+    // Connection indicator
+    const dot  = document.getElementById('conn-dot');
+    const txt  = document.getElementById('conn-text');
+    const ipEl = document.getElementById('ip-tag');
+
+    if (d.server === 'ok') {
+      dot.className  = d.ollama === 'ok' ? 'dot ok' : 'dot';
+      txt.textContent = d.ollama === 'ok' ? 'Connected' : 'Ollama offline';
+      ipEl.textContent = d.k1_ip || '—';
+    }
+
+    // Battery
+    const batt    = d.battery;
+    const battEl  = document.getElementById('st-batt');
+    if (batt && batt.level !== null) {
+      battEl.textContent = batt.level + '%';
+      battEl.className   = batt.critical ? 'sr-val err' : batt.warning ? 'sr-val warn' : 'sr-val ok';
+      if (batt.critical) toast('🔋 CRITICAL BATTERY: ' + batt.level + '% — plug in now!', 'err', 10000);
+      else if (batt.warning) toast('🔋 Battery low: ' + batt.level + '%', 'warn', 6000);
+    } else {
+      battEl.textContent = '—';
+    }
+
+    // Mode
+    if (d.robot_mode) updateModeUI(d.robot_mode);
+
+  } catch(e) {
+    document.getElementById('conn-dot').className   = 'dot err';
+    document.getElementById('conn-text').textContent = 'Offline';
+  }
+}
+
+// ── Sliders ───────────────────────────────────────────────────
+const volR = document.getElementById('vol-r');
+const volV = document.getElementById('vol-v');
+const spdR = document.getElementById('spd-r');
+const spdV = document.getElementById('spd-v');
+const spdL = ['','Very slow','Slow','Slower','Moderate','Normal','Quick','Fast','Very fast','Rapid','Immediate'];
+volR.addEventListener('input', e => { volV.textContent = Math.round(e.target.value) + '%'; });
+spdR.addEventListener('input', e => { spdV.textContent = spdL[Math.round(e.target.value)]; });
+
+// ── Init ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Poll health every 15s once safety confirmed
+  setInterval(() => { if (safetyConfirmed) pollStatus(); }, 15000);
+  // Initial health check (non-blocking, just for UI)
+  pollStatus();
+});
 </script>
 </body>
 </html>

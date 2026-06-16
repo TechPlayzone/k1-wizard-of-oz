@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>K1 Robot — AI Innovation Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --ice: #b8e8f0;
+  --ice-dim: #7dcde0;
+  --pink: #f472b6;
+  --deep: #050c18;
+  --mid: #0a1628;
+  --panel: rgba(8,18,38,0.82);
+  --glass: rgba(184,232,240,0.06);
+  --border: rgba(184,232,240,0.14);
+  --text: #e4f0f6;
+  --muted: rgba(184,232,240,0.40);
+  --green: #34d399;
+  --warn: #fbbf24;
+  --err: #f87171;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body {
+  background: var(--deep);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Background */
+.bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(125,205,224,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 80%, rgba(244,114,182,0.09) 0%, transparent 50%);
+}
+.grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(184,232,240,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(184,232,240,0.03) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+
+/* Layout */
+.shell {
+  position: relative; z-index: 1;
+  max-width: 860px; margin: 0 auto;
+  width: 100%; padding: 0 20px;
+  display: flex; flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 0 14px;
+  border-bottom: 1px solid var(--border);
+}
+.logo { display: flex; align-items: center; gap: 14px; }
+.logo-icon {
+  width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--ice-dim), var(--pink));
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+  box-shadow: 0 0 20px rgba(125,205,224,0.2);
+}
+.logo-title {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; line-height: 1.2;
+}
+.logo-sub {
+  font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted);
+  letter-spacing: 0.07em; margin-top: 2px;
+}
+.status-pill {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 999px; padding: 5px 14px;
+  font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted);
+  cursor: pointer; transition: border-color 0.2s;
+}
+.status-pill:hover { border-color: var(--ice-dim); }
+.dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--warn); box-shadow: 0 0 6px var(--warn);
+  transition: all 0.3s;
+}
+.dot.ok  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.dot.err { background: var(--err);   box-shadow: 0 0 8px var(--err); }
+
+/* Robot status bar */
+.robot-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; margin: 14px 0 0;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  font-family: 'DM Mono', monospace; font-size: 0.68rem;
+}
+.robot-avatar {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--ice-dim), #38bcd8);
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.robot-name { color: var(--ice); font-weight: 500; font-size: 0.78rem; font-family: 'Syne', sans-serif; }
+.robot-status { color: var(--muted); font-size: 0.62rem; margin-top: 1px; }
+.speaking-badge {
+  margin-left: auto; display: flex; align-items: center; gap: 6px;
+  background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25);
+  border-radius: 999px; padding: 4px 12px; color: var(--green);
+  font-size: 0.62rem; opacity: 0; transition: opacity 0.3s;
+}
+.speaking-badge.on { opacity: 1; animation: pulse-green 1.5s infinite; }
+.speak-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+
+/* Chat area */
+.chat-area {
+  flex: 1; display: flex; flex-direction: column;
+  gap: 14px; padding: 20px 0 10px;
+  overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.msg { display: flex; gap: 10px; animation: msgIn 0.25s ease; }
+.msg.user { flex-direction: row-reverse; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.msg.robot .avatar { background: linear-gradient(135deg, var(--ice-dim), #38bcd8); }
+.msg.user  .avatar { background: linear-gradient(135deg, var(--pink), #c026d3); }
+.bubble {
+  max-width: 80%; padding: 11px 15px; border-radius: 14px;
+  font-size: 0.9rem; line-height: 1.6;
+}
+.msg.robot .bubble {
+  background: rgba(125,205,224,0.09); border: 1px solid rgba(125,205,224,0.18);
+  border-top-left-radius: 4px;
+}
+.msg.user .bubble {
+  background: rgba(244,114,182,0.09); border: 1px solid rgba(244,114,182,0.18);
+  border-top-right-radius: 4px;
+}
+.msg-time {
+  font-family: 'DM Mono', monospace; font-size: 0.58rem; color: var(--muted);
+  margin-top: 4px;
+}
+.msg.user .msg-time { text-align: right; }
+.thinking {
+  display: flex; gap: 5px;
+  background: rgba(125,205,224,0.07); border: 1px solid rgba(125,205,224,0.14);
+  border-radius: 14px; border-top-left-radius: 4px;
+  padding: 13px 15px; width: fit-content;
+}
+.td { width: 6px; height: 6px; border-radius: 50%; background: var(--ice-dim); animation: bounce 1.2s infinite; }
+.td:nth-child(2){animation-delay:0.18s;} .td:nth-child(3){animation-delay:0.36s;}
+
+/* Welcome card */
+.welcome {
+  text-align: center; padding: 40px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.welcome-icon { font-size: 52px; }
+.welcome-title {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem;
+  background: linear-gradient(135deg, var(--ice), var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.welcome-sub { color: var(--muted); font-size: 0.875rem; max-width: 400px; line-height: 1.6; }
+.quick-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+.quick-btn {
+  background: var(--glass); border: 1px solid var(--border); border-radius: 999px;
+  padding: 7px 16px; cursor: pointer; color: var(--muted);
+  font-family: 'Outfit', sans-serif; font-size: 0.78rem;
+  transition: all 0.18s;
+}
+.quick-btn:hover { color: var(--ice); border-color: var(--ice-dim); background: rgba(125,205,224,0.08); }
+
+/* Input area */
+.input-area {
+  padding: 14px 0 20px;
+  border-top: 1px solid var(--border);
+}
+.input-row { display: flex; gap: 10px; align-items: flex-end; }
+textarea {
+  flex: 1; background: var(--glass); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 15px;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 0.9rem;
+  resize: none; outline: none; min-height: 46px; max-height: 120px;
+  line-height: 1.5; transition: border-color 0.2s;
+  scrollbar-width: thin;
+}
+textarea:focus { border-color: var(--ice-dim); }
+textarea::placeholder { color: var(--muted); }
+.send-btn {
+  width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--ice-dim), #38bcd8);
+  border: none; cursor: pointer; color: var(--deep);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+  transition: transform 0.12s, opacity 0.2s;
+}
+.send-btn:hover { transform: scale(1.06); }
+.send-btn:active { transform: scale(0.96); }
+.send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+.input-hint {
+  font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted);
+  margin-top: 8px; display: flex; justify-content: space-between; align-items: center;
+}
+.reset-btn {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+.reset-btn:hover { color: var(--err); }
+
+/* Footer */
+footer {
+  padding: 10px 0 16px;
+  font-family: 'DM Mono', monospace; font-size: 0.58rem; color: var(--muted);
+  text-align: center; border-top: 1px solid var(--border);
+}
+
+/* Animations */
+@keyframes msgIn   { from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;} }
+@keyframes bounce  { 0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-6px);} }
+@keyframes pulse-green {
+  0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,0.3);}
+  50%{box-shadow:0 0 0 4px rgba(52,211,153,0);}
+}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="grid"></div>
+
+<div class="shell">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🤖</div>
+      <div>
+        <div class="logo-title">K1 Robot Interface</div>
+        <div class="logo-sub">AI INNOVATION CENTER · HILLSBOROUGH COLLEGE</div>
+      </div>
+    </div>
+    <div class="status-pill" onclick="checkHealth()">
+      <div class="dot" id="dot"></div>
+      <span id="statusText">CHECKING...</span>
+    </div>
+  </header>
+
+  <!-- Robot bar -->
+  <div class="robot-bar">
+    <div class="robot-avatar">🤖</div>
+    <div>
+      <div class="robot-name">K1 — Booster Robotics</div>
+      <div class="robot-status" id="robotStatus">Waiting for connection...</div>
+    </div>
+    <div class="speaking-badge" id="speakBadge">
+      <div class="speak-dot"></div> SPEAKING
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-area" id="chatArea">
+    <div class="welcome" id="welcome">
+      <div class="welcome-icon">🤖</div>
+      <div class="welcome-title">Hello, I'm K1!</div>
+      <div class="welcome-sub">
+        Your AI robot assistant from the Hillsborough College AI Innovation Center, 
+        in partnership with URG Americas. Type a message and I'll respond out loud!
+      </div>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="send('Introduce yourself')">👋 Introduce yourself</button>
+        <button class="quick-btn" onclick="send('What is artificial intelligence?')">🧠 What is AI?</button>
+        <button class="quick-btn" onclick="send('What can students learn here?')">🎓 What can I learn?</button>
+        <button class="quick-btn" onclick="send('Tell me something interesting about robots')">🤖 Robot facts</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <div class="input-row">
+      <textarea id="msgInput"
+        placeholder="Type a message — K1 will respond out loud..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
+    </div>
+    <div class="input-hint">
+      <span>ENTER to send · SHIFT+ENTER for new line</span>
+      <button class="reset-btn" onclick="resetChat()">↺ RESET CONVERSATION</button>
+    </div>
+  </div>
+
+  <footer>
+    AI Innovation Center · Hillsborough College · Tampa, FL · In partnership with URG Americas
+    &nbsp;|&nbsp; K1 Powered by Ollama + Piper TTS
+  </footer>
+
+</div>
+
+<script>
+const FLASK = "http://localhost:5000";
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  checkHealth();
+  document.getElementById('msgInput').focus();
+});
+
+// Health check
+async function checkHealth() {
+  const dot = document.getElementById('dot');
+  const txt = document.getElementById('statusText');
+  const status = document.getElementById('robotStatus');
+  try {
+    const r = await fetch(`${FLASK}/health`, { signal: AbortSignal.timeout(4000) });
+    const d = await r.json();
+    if (d.ollama === 'ok') {
+      dot.className = 'dot ok';
+      txt.textContent = 'ONLINE';
+      status.textContent = `Connected · ${d.model} · K1 @ ${d.k1_ip}`;
+    } else {
+      dot.className = 'dot err';
+      txt.textContent = 'OLLAMA DOWN';
+      status.textContent = 'Ollama not reachable — is it running?';
+    }
+  } catch(e) {
+    dot.className = 'dot err';
+    txt.textContent = 'OFFLINE';
+    status.textContent = 'Flask server not reachable — is app.py running?';
+  }
+}
+
+// Send message
+async function send(overrideText) {
+  const input = document.getElementById('msgInput');
+  const text = overrideText || input.value.trim();
+  if (!text) return;
+
+  // Hide welcome
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  input.value = '';
+  autoResize(input);
+  document.getElementById('sendBtn').disabled = true;
+
+  addMessage('user', text);
+  const thinking = addThinking();
+
+  try {
+    // Show speaking indicator
+    document.getElementById('speakBadge').classList.add('on');
+    document.getElementById('robotStatus').textContent = 'Thinking...';
+
+    const r = await fetch(`${FLASK}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+    const d = await r.json();
+    thinking.remove();
+
+    if (d.error) throw new Error(d.error);
+
+    addMessage('robot', d.response);
+    document.getElementById('robotStatus').textContent = d.spoken ? 'Speaking response...' : 'Response ready (speak error: ' + d.speak_error + ')';
+
+    // Hide speaking badge after a delay
+    setTimeout(() => {
+      document.getElementById('speakBadge').classList.remove('on');
+      document.getElementById('robotStatus').textContent = 'Ready';
+    }, 4000);
+
+  } catch(e) {
+    thinking.remove();
+    addMessage('robot', `⚠️ Error: ${e.message}`);
+    document.getElementById('speakBadge').classList.remove('on');
+    document.getElementById('robotStatus').textContent = 'Error — check Flask server';
+  } finally {
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('msgInput').focus();
+  }
+}
+
+// Reset conversation
+async function resetChat() {
+  try {
+    await fetch(`${FLASK}/reset`, { method: 'POST' });
+  } catch(e) {}
+  document.getElementById('chatArea').innerHTML = `
+    <div style="text-align:center;padding:20px;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.72rem;">
+      Conversation reset. Start a new one!
+    </div>`;
+}
+
+// Add message bubble
+function addMessage(role, text) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="avatar">${role === 'robot' ? '🤖' : '🧑'}</div>
+    <div>
+      <div class="bubble">${esc(text)}</div>
+      <div class="msg-time">${now()}</div>
+    </div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+// Thinking dots
+function addThinking() {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg robot';
+  div.innerHTML = `
+    <div class="avatar">🤖</div>
+    <div class="thinking">
+      <div class="td"></div><div class="td"></div><div class="td"></div>
+    </div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div;
+}
+
+// Helpers
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+function now() {
+  return new Date().toLocaleTimeString('en-US', { hour12: false });
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
