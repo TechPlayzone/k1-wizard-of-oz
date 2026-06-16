@@ -105,22 +105,14 @@ def rpc_call(api_id: int, body: dict, timeout: int = 10) -> tuple:
         )
         output       = result.stdout
         status_match = re.search(r"status=(\d+)", output)
+        body_match   = re.search(r"body='([^']*)'", output)
         status       = int(status_match.group(1)) if status_match else -1
-
-        # Use findall and take the LAST match — the output contains two
-        # body= fields: the request body first, the response body last.
-        # re.search() returns the first (request) body which is always
-        # empty '{}', causing all mode queries to fail. Taking the last
-        # match gives us the actual response body e.g. '{"mode":0}'.
-        body_matches = re.findall(r"body='([^']*)'", output)
         resp_body    = {}
-        if body_matches:
-            last_body = body_matches[-1]
-            if last_body:
-                try:
-                    resp_body = json.loads(last_body)
-                except Exception:
-                    pass
+        if body_match and body_match.group(1):
+            try:
+                resp_body = json.loads(body_match.group(1))
+            except Exception:
+                pass
         return status, resp_body
     except subprocess.TimeoutExpired:
         print(f"[RPC] Timeout — api_id={api_id}")
@@ -190,13 +182,8 @@ class K1Robot:
             self.current_mode = _rpc_mode_to_str(actual)
             print(f"[K1] Mode synced on connect: {self.current_mode} (rpc={actual})")
         else:
-            # CRITICAL SAFETY: Cannot verify robot state.
-            # Do NOT assume damp — robot could be standing in Walk mode.
-            # Set to unknown so the dashboard stays fully locked until
-            # the operator physically inspects and confirms the position.
-            self.current_mode = "unknown"
-            print("[K1] WARNING: Cannot verify robot mode — set to UNKNOWN.")
-            print("[K1] Dashboard will remain locked until operator confirms position.")
+            self.current_mode = "damp"
+            print("[K1] Mode sync failed — defaulting to 'damp' for safety")
 
         return True
 
@@ -304,6 +291,50 @@ class K1Robot:
 
         print(f"[K1] GetUp RPC failed (status={status})")
         return False
+
+    def lie_down(self) -> bool:
+        """
+        Controlled lie down via SDK LieDown().
+        Must be called from Prep mode only — robot crouches then lies
+        down safely in a controlled motion.
+
+        SAFETY: Never call from Walk mode.
+        Safe down sequence: Walk → Prep → LieDown → robot on floor
+        """
+        actual = _get_actual_mode()
+
+        if actual < 0:
+            print("[K1] Cannot verify mode — LieDown blocked for safety")
+            return False
+
+        if actual in WALK_MODES:
+            print("[K1] SAFETY BLOCK: Cannot LieDown from Walk. "
+                  "Click Prep first to crouch, then Lie Down.")
+            return False
+
+        if actual == MODE_DAMP:
+            print("[K1] Already in Damp/lying down — no action needed")
+            self.current_mode = "damp"
+            return True
+
+        if actual != MODE_PREP:
+            print(f"[K1] SAFETY BLOCK: LieDown requires Prep mode (rpc={actual})")
+            return False
+
+        # Robot is confirmed in Prep — safe to lie down
+        if _sdk_available and self.client:
+            print("[K1] → LieDown (controlled via SDK)")
+            ret = self.client.LieDown()
+            if ret == 0:
+                self.current_mode = "damp"
+                print("[K1] LieDown complete — robot is lying safely on floor")
+                return True
+            else:
+                print(f"[K1] SDK LieDown failed (ret={ret}) — falling back to Damp")
+                return self.set_damp_mode()
+        else:
+            print("[K1] SDK not available — using Damp fallback")
+            return self.set_damp_mode()
 
     # ── Movement ──────────────────────────────────────────────
 

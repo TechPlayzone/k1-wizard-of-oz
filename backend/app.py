@@ -364,6 +364,42 @@ def gesture():
 
 
 # =============================================================================
+# LIE DOWN
+# =============================================================================
+
+@app.route('/api/liedown', methods=['POST'])
+def lie_down():
+    """
+    Controlled lie down via SDK LieDown().
+    Robot MUST be in Prep mode before calling this.
+    Safe down sequence: Walk → Prep → /api/liedown
+
+    Returns 400 if robot is in Walk mode (must Prep first).
+    """
+    if not _safety_confirmed:
+        return jsonify({"error": "Confirm robot position first."}), 403
+
+    try:
+        success = robot.lie_down()
+        if success:
+            return jsonify({
+                "ok":   True,
+                "mode": robot.current_mode,
+                "message": "Robot is lying down safely."
+            })
+        else:
+            return jsonify({
+                "error": "LieDown failed.",
+                "detail": (
+                    "Robot must be in Prep mode before lying down. "
+                    "Click Prep first, wait for robot to crouch, then Lie Down."
+                )
+            }), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# =============================================================================
 # LLM CHAT + TTS
 # =============================================================================
 
