@@ -1,1063 +1,450 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>K1 Control Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Lora:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>K1 Robot — AI Innovation Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --ice: #b8e8f0;
+  --ice-dim: #7dcde0;
+  --pink: #f472b6;
+  --deep: #050c18;
+  --mid: #0a1628;
+  --panel: rgba(8,18,38,0.82);
+  --glass: rgba(184,232,240,0.06);
+  --border: rgba(184,232,240,0.14);
+  --text: #e4f0f6;
+  --muted: rgba(184,232,240,0.40);
+  --green: #34d399;
+  --warn: #fbbf24;
+  --err: #f87171;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body {
+  background: var(--deep);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
 
-    body {
-      font-family: 'Lora','Georgia',serif;
-      background: #fafaf8;
-      color: #2c2c2c;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
+/* Background */
+.bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(125,205,224,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 90% 80%, rgba(244,114,182,0.09) 0%, transparent 50%);
+}
+.grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(184,232,240,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(184,232,240,0.03) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
 
-    .page {
-      max-width: 1300px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 0.9rem 1.5rem 0.5rem;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+/* Layout */
+.shell {
+  position: relative; z-index: 1;
+  max-width: 860px; margin: 0 auto;
+  width: 100%; padding: 0 20px;
+  display: flex; flex-direction: column;
+  min-height: 100vh;
+}
 
-    /* ── HEADER ──────────────────────────────────────── */
-    header {
-      flex-shrink: 0;
-      border-bottom: 3px solid #2c2c2c;
-      padding-bottom: 0.6rem;
-      margin-bottom: 0.9rem;
-    }
-    .hd-top {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-bottom: 0.25rem;
-    }
-    .masthead {
-      font-family: 'Crimson Text',serif;
-      font-size: 38px;
-      font-weight: 700;
-      letter-spacing: -1px;
-      line-height: 1;
-    }
-    .tagline {
-      font-size: 11px;
-      color: #999;
-      font-weight: 500;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    .hd-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      color: #666;
-    }
-    .status-group { display:flex; align-items:center; gap:14px; }
-    .status-dot-wrap { display:flex; align-items:center; gap:6px; }
-    .dot { width:7px; height:7px; border-radius:50%; background:#4caf50; flex-shrink:0; }
-    .ip-tag {
-      font-family: 'Inter',sans-serif;
-      font-size: 11px;
-      background: #f0f0ee;
-      border: 1px solid #d8d8d5;
-      padding: 2px 8px;
-      color: #555;
-      letter-spacing: 0.3px;
-    }
-    .booster-link {
-      color: #2c5aa0;
-      text-decoration: none;
-      border-bottom: 1px solid #2c5aa0;
-      font-size: 12px;
-      transition: color .2s;
-    }
-    .booster-link:hover { color: #1a3a5c; }
+/* Header */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 0 14px;
+  border-bottom: 1px solid var(--border);
+}
+.logo { display: flex; align-items: center; gap: 14px; }
+.logo-icon {
+  width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--ice-dim), var(--pink));
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+  box-shadow: 0 0 20px rgba(125,205,224,0.2);
+}
+.logo-title {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; line-height: 1.2;
+}
+.logo-sub {
+  font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted);
+  letter-spacing: 0.07em; margin-top: 2px;
+}
+.status-pill {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 999px; padding: 5px 14px;
+  font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted);
+  cursor: pointer; transition: border-color 0.2s;
+}
+.status-pill:hover { border-color: var(--ice-dim); }
+.dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--warn); box-shadow: 0 0 6px var(--warn);
+  transition: all 0.3s;
+}
+.dot.ok  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.dot.err { background: var(--err);   box-shadow: 0 0 8px var(--err); }
 
-    /* ── 3-COLUMN GRID ───────────────────────────────── */
-    main {
-      display: grid;
-      grid-template-columns: 255px 1fr 310px;
-      gap: 1.1rem;
-      flex: 1;
-      min-height: 0;
-      padding-bottom: 0.6rem;
-    }
+/* Robot status bar */
+.robot-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; margin: 14px 0 0;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  font-family: 'DM Mono', monospace; font-size: 0.68rem;
+}
+.robot-avatar {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--ice-dim), #38bcd8);
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.robot-name { color: var(--ice); font-weight: 500; font-size: 0.78rem; font-family: 'Syne', sans-serif; }
+.robot-status { color: var(--muted); font-size: 0.62rem; margin-top: 1px; }
+.speaking-badge {
+  margin-left: auto; display: flex; align-items: center; gap: 6px;
+  background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25);
+  border-radius: 999px; padding: 4px 12px; color: var(--green);
+  font-size: 0.62rem; opacity: 0; transition: opacity 0.3s;
+}
+.speaking-badge.on { opacity: 1; animation: pulse-green 1.5s infinite; }
+.speak-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
 
-    .col {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-    .col-title {
-      font-family: 'Crimson Text',serif;
-      font-size: 16px;
-      font-weight: 600;
-      padding-bottom: 0.4rem;
-      margin-bottom: 0.65rem;
-      border-bottom: 2px solid #e0e0e0;
-      flex-shrink: 0;
-    }
+/* Chat area */
+.chat-area {
+  flex: 1; display: flex; flex-direction: column;
+  gap: 14px; padding: 20px 0 10px;
+  overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.msg { display: flex; gap: 10px; animation: msgIn 0.25s ease; }
+.msg.user { flex-direction: row-reverse; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.msg.robot .avatar { background: linear-gradient(135deg, var(--ice-dim), #38bcd8); }
+.msg.user  .avatar { background: linear-gradient(135deg, var(--pink), #c026d3); }
+.bubble {
+  max-width: 80%; padding: 11px 15px; border-radius: 14px;
+  font-size: 0.9rem; line-height: 1.6;
+}
+.msg.robot .bubble {
+  background: rgba(125,205,224,0.09); border: 1px solid rgba(125,205,224,0.18);
+  border-top-left-radius: 4px;
+}
+.msg.user .bubble {
+  background: rgba(244,114,182,0.09); border: 1px solid rgba(244,114,182,0.18);
+  border-top-right-radius: 4px;
+}
+.msg-time {
+  font-family: 'DM Mono', monospace; font-size: 0.58rem; color: var(--muted);
+  margin-top: 4px;
+}
+.msg.user .msg-time { text-align: right; }
+.thinking {
+  display: flex; gap: 5px;
+  background: rgba(125,205,224,0.07); border: 1px solid rgba(125,205,224,0.14);
+  border-radius: 14px; border-top-left-radius: 4px;
+  padding: 13px 15px; width: fit-content;
+}
+.td { width: 6px; height: 6px; border-radius: 50%; background: var(--ice-dim); animation: bounce 1.2s infinite; }
+.td:nth-child(2){animation-delay:0.18s;} .td:nth-child(3){animation-delay:0.36s;}
 
-    /* ── UTILITY ─────────────────────────────────────── */
-    .lbl {
-      font-family: 'Inter',sans-serif;
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      color: #2c2c2c;
-      margin-bottom: 4px;
-      display: block;
-    }
-    .sep { border:none; border-top:1px solid #e8e8e5; margin:0.6rem 0; }
+/* Welcome card */
+.welcome {
+  text-align: center; padding: 40px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.welcome-icon { font-size: 52px; }
+.welcome-title {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem;
+  background: linear-gradient(135deg, var(--ice), var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.welcome-sub { color: var(--muted); font-size: 0.875rem; max-width: 400px; line-height: 1.6; }
+.quick-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+.quick-btn {
+  background: var(--glass); border: 1px solid var(--border); border-radius: 999px;
+  padding: 7px 16px; cursor: pointer; color: var(--muted);
+  font-family: 'Outfit', sans-serif; font-size: 0.78rem;
+  transition: all 0.18s;
+}
+.quick-btn:hover { color: var(--ice); border-color: var(--ice-dim); background: rgba(125,205,224,0.08); }
 
-    /* ── BUTTONS ─────────────────────────────────────── */
-    button {
-      font-family: 'Inter',sans-serif;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      border: 1px solid #2c2c2c;
-      background: transparent;
-      color: #2c2c2c;
-      cursor: pointer;
-      padding: 7px 10px;
-      transition: background .15s, color .15s;
-      flex: 1;
-    }
-    button:hover { background:#2c2c2c; color:#fafaf8; }
-    button.sec { border-color:#aaa; color:#666; }
-    button.sec:hover { background:#666; color:#fafaf8; }
-    button.green { border-color:#3a8a3a; color:#3a8a3a; }
-    button.green:hover { background:#3a8a3a; color:#fff; }
-    button.active-dark { background:#2c2c2c; color:#fafaf8; }
-    button.active-green { background:#3a8a3a; color:#fff; border-color:#3a8a3a; }
+/* Input area */
+.input-area {
+  padding: 14px 0 20px;
+  border-top: 1px solid var(--border);
+}
+.input-row { display: flex; gap: 10px; align-items: flex-end; }
+textarea {
+  flex: 1; background: var(--glass); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 15px;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 0.9rem;
+  resize: none; outline: none; min-height: 46px; max-height: 120px;
+  line-height: 1.5; transition: border-color 0.2s;
+  scrollbar-width: thin;
+}
+textarea:focus { border-color: var(--ice-dim); }
+textarea::placeholder { color: var(--muted); }
+.send-btn {
+  width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--ice-dim), #38bcd8);
+  border: none; cursor: pointer; color: var(--deep);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+  transition: transform 0.12s, opacity 0.2s;
+}
+.send-btn:hover { transform: scale(1.06); }
+.send-btn:active { transform: scale(0.96); }
+.send-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+.input-hint {
+  font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted);
+  margin-top: 8px; display: flex; justify-content: space-between; align-items: center;
+}
+.reset-btn {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+.reset-btn:hover { color: var(--err); }
 
-    /* ── INPUTS / SELECTS ────────────────────────────── */
-    select, textarea, input[type="text"], input[type="password"] {
-      font-family: 'Lora',serif;
-      font-size: 12px;
-      border: 1px solid #d0d0d0;
-      background: #fff;
-      color: #2c2c2c;
-      padding: 7px 10px;
-      width: 100%;
-      outline: none;
-    }
-    select:focus, textarea:focus,
-    input[type="text"]:focus, input[type="password"]:focus { border-color:#2c2c2c; }
-    select { -webkit-appearance:none; appearance:none; cursor:pointer; }
+/* Footer */
+footer {
+  padding: 10px 0 16px;
+  font-family: 'DM Mono', monospace; font-size: 0.58rem; color: var(--muted);
+  text-align: center; border-top: 1px solid var(--border);
+}
 
-    /* ── SLIDERS ─────────────────────────────────────── */
-    .sl-row { display:flex; align-items:center; gap:8px; }
-    input[type="range"] {
-      flex:1; height:2px; background:#d8d8d5;
-      -webkit-appearance:none; appearance:none; outline:none; border-radius:0;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance:none; width:13px; height:13px;
-      border-radius:50%; background:#2c2c2c; cursor:pointer;
-    }
-    input[type="range"]::-moz-range-thumb {
-      width:13px; height:13px; border-radius:50%;
-      background:#2c2c2c; cursor:pointer; border:none;
-    }
-    .sl-val {
-      font-family:'Inter',sans-serif;
-      font-size:10px; font-weight:600;
-      min-width:38px; text-align:right; color:#555;
-    }
-
-    /* ── LEFT: MOVEMENT ──────────────────────────────── */
-    .left-scroll { overflow-y:auto; flex:1; padding-right:3px; }
-
-    .move-pad {
-      display: grid;
-      grid-template-columns: repeat(3,44px);
-      grid-template-rows: repeat(3,auto);
-      gap: 4px;
-      justify-content: center;
-      margin-top: 4px;
-    }
-    .mc { text-align:center; }
-    .mb {
-      width:44px; height:36px; flex:none;
-      display:flex; align-items:center; justify-content:center;
-      font-size:16px;
-    }
-    .ml {
-      font-family:'Inter',sans-serif;
-      font-size:8px; font-weight:600; color:#888;
-      text-transform:uppercase; letter-spacing:.2px;
-      margin-top:2px; line-height:1.1;
-    }
-
-    /* ── LEFT: GESTURES ──────────────────────────────── */
-    .gest-grid {
-      display:grid; grid-template-columns:repeat(3,1fr);
-      gap:6px; margin-top:4px;
-    }
-    .gb {
-      display:flex; flex-direction:column;
-      align-items:center; gap:4px;
-      padding:7px 4px;
-      border:1px solid #c8c8c5;
-      background:#fff; cursor:pointer;
-      transition:background .15s, border-color .15s;
-      flex:none;
-    }
-    .gb:hover { background:#f0f0ee; border-color:#2c2c2c; }
-    .gb span {
-      font-family:'Inter',sans-serif;
-      font-size:9px; font-weight:600;
-      text-transform:uppercase; letter-spacing:.3px; color:#555;
-    }
-
-    /* ── MIDDLE: CONVERSATION PANE ───────────────────── */
-    .conv-panel {
-      display:flex; flex-direction:column;
-      flex:1; min-height:0;
-      border:1px solid #d8d8d5;
-      background:#fff;
-    }
-
-    /* LLM selector bar */
-    .llm-bar {
-      flex-shrink:0;
-      padding:0.55rem 0.75rem 0;
-      border-bottom:1px solid #e8e8e5;
-    }
-    .llm-pills {
-      display:flex; gap:0; margin-bottom:0.5rem;
-    }
-    .llm-pill {
-      flex:1; padding:6px 4px;
-      font-family:'Inter',sans-serif;
-      font-size:10px; font-weight:600;
-      text-transform:uppercase; letter-spacing:.4px;
-      border:1px solid #d0d0d0;
-      background:transparent; color:#888;
-      cursor:pointer; transition:all .15s;
-    }
-    .llm-pill:not(:last-child) { border-right:none; }
-    .llm-pill:hover { background:#f0f0ee; color:#2c2c2c; }
-    .llm-pill.active { background:#2c2c2c; color:#fafaf8; border-color:#2c2c2c; z-index:1; }
-
-    .api-key-row {
-      display:flex; gap:6px;
-      margin-bottom:0.5rem;
-      align-items:center;
-    }
-    .api-key-row input {
-      flex:1; font-family:'Inter',sans-serif;
-      font-size:11px; padding:5px 8px;
-    }
-    .api-key-row button {
-      flex:none; padding:5px 10px;
-      font-size:10px;
-    }
-    .session-note {
-      font-family:'Inter',sans-serif;
-      font-size:9px; color:#aaa;
-      margin-bottom:0.4rem; letter-spacing:.2px;
-    }
-
-    /* chat messages */
-    .chat-history {
-      flex:1; overflow-y:auto;
-      padding:0.7rem 0.75rem;
-      display:flex; flex-direction:column; gap:0.65rem;
-    }
-    .cm { display:flex; flex-direction:column; gap:2px; }
-    .cm .who {
-      font-family:'Inter',sans-serif;
-      font-size:9px; font-weight:600;
-      text-transform:uppercase; letter-spacing:.4px; color:#aaa;
-    }
-    .cm.user .who { color:#2c5aa0; }
-    .cm.robot .who { color:#3a6e3a; }
-    .cm .bub {
-      font-size:12px; line-height:1.5; color:#2c2c2c;
-      padding:7px 10px;
-    }
-    .cm.user .bub { background:#f0f4fb; }
-    .cm.robot .bub { background:#f3f7f3; font-style:italic; }
-
-    .chat-sep { border:none; border-top:1px solid #e8e8e5; flex-shrink:0; }
-    .chat-foot {
-      flex-shrink:0; padding:0.65rem 0.75rem;
-      display:flex; flex-direction:column; gap:6px;
-    }
-    textarea.msg-in {
-      resize:none; min-height:52px; max-height:80px;
-      font-size:13px; line-height:1.4;
-    }
-    .chat-btns { display:flex; gap:7px; }
-
-    /* ── RIGHT: LIVE PANE ────────────────────────────── */
-
-    /* Real / Isaac toggle */
-    .view-toggle {
-      display:flex; gap:0; margin-bottom:0.65rem; flex-shrink:0;
-    }
-    .vt-btn {
-      flex:1; padding:7px 6px;
-      font-family:'Inter',sans-serif;
-      font-size:10px; font-weight:600;
-      text-transform:uppercase; letter-spacing:.4px;
-      border:1px solid #d0d0d0;
-      background:transparent; color:#888;
-      cursor:pointer; transition:all .15s;
-    }
-    .vt-btn:first-child { border-right:none; }
-    .vt-btn:hover { background:#f0f0ee; color:#2c2c2c; }
-    .vt-btn.active { background:#2c2c2c; color:#fafaf8; border-color:#2c2c2c; }
-
-    /* camera / sim viewport */
-    .view-port {
-      border:1px solid #d0d0d0;
-      background:#111;
-      position:relative;
-      flex-shrink:0;
-      aspect-ratio:4/3;
-      overflow:hidden;
-    }
-    .cam-placeholder {
-      position:absolute; inset:0;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center; gap:8px;
-    }
-    .cam-placeholder span {
-      font-family:'Inter',sans-serif;
-      font-size:11px; color:#888;
-      letter-spacing:.5px; text-transform:uppercase;
-    }
-    .isaac-placeholder {
-      position:absolute; inset:0;
-      display:none;
-      flex-direction:column;
-      align-items:center; justify-content:center; gap:10px;
-      padding:1.2rem;
-    }
-    .isaac-placeholder.visible { display:flex; }
-    .isaac-logo {
-      font-family:'Inter',sans-serif;
-      font-size:13px; font-weight:600;
-      color:#76b900; letter-spacing:1px;
-      text-transform:uppercase;
-    }
-    .isaac-info {
-      font-family:'Inter',sans-serif;
-      font-size:10px; color:#666;
-      text-align:center; line-height:1.5;
-    }
-    .isaac-url {
-      font-family:'Inter',sans-serif;
-      font-size:10px; color:#999;
-      background:#1e1e1e;
-      padding:4px 10px;
-      letter-spacing:.3px;
-    }
-    .isaac-connect {
-      padding:7px 18px;
-      font-family:'Inter',sans-serif;
-      font-size:10px; font-weight:600;
-      text-transform:uppercase; letter-spacing:.5px;
-      border:1px solid #76b900;
-      background:transparent; color:#76b900;
-      cursor:pointer; transition:all .15s; flex:none;
-    }
-    .isaac-connect:hover { background:#76b900; color:#111; }
-
-    /* robot status strip */
-    .status-strip {
-      flex:1; min-height:0;
-      display:flex; flex-direction:column;
-      border:1px solid #d8d8d5;
-      background:#fff;
-      margin-top:0.75rem;
-    }
-    .status-strip-title {
-      font-family:'Inter',sans-serif;
-      font-size:10px; font-weight:600;
-      text-transform:uppercase; letter-spacing:.4px;
-      color:#888; padding:0.5rem 0.7rem 0.3rem;
-      border-bottom:1px solid #e8e8e5;
-      flex-shrink:0;
-    }
-    .status-rows { padding:0.5rem 0.7rem; display:flex; flex-direction:column; gap:0.5rem; }
-    .sr {
-      display:flex; justify-content:space-between; align-items:center;
-      font-family:'Inter',sans-serif; font-size:11px;
-    }
-    .sr-key { color:#999; font-size:10px; text-transform:uppercase; letter-spacing:.3px; }
-    .sr-val { color:#2c2c2c; font-weight:600; }
-    .sr-val.ok { color:#3a8a3a; }
-    .sr-val.warn { color:#b06000; }
-    .sr-val.action {
-      color:#2c5aa0;
-      font-style:italic;
-      font-weight:400;
-    }
-
-    /* ── BATTERY WARNING ─────────────────────────────── */
-    #battery-alert {
-      display: none;
-      padding: 0.5rem 1rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    #battery-alert.warning  { background: #fff3cd; color: #856404; border-bottom: 1px solid #ffc107; }
-    #battery-alert.critical { background: #f8d7da; color: #721c24; border-bottom: 1px solid #f5c6cb; animation: blink 1s step-start infinite; }
-    @keyframes blink { 50% { opacity: 0.4; } }
-
-    /* ── FOOTER ──────────────────────────────────────── */
-    footer {
-      flex-shrink:0;
-      border-top:1px solid #d0d0d0;
-      padding:0.4rem 0;
-      font-family:'Inter',sans-serif;
-      font-size:10px; color:#bbb;
-      text-align:center; letter-spacing:.3px;
-    }
-  </style>
+/* Animations */
+@keyframes msgIn   { from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;} }
+@keyframes bounce  { 0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-6px);} }
+@keyframes pulse-green {
+  0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,0.3);}
+  50%{box-shadow:0 0 0 4px rgba(52,211,153,0);}
+}
+</style>
 </head>
 <body>
-<div class="page">
 
-  <!-- BATTERY WARNING BANNER -->
-  <div id="battery-alert"></div>
+<div class="bg"></div>
+<div class="grid"></div>
 
-  <!-- HEADER -->
+<div class="shell">
+
+  <!-- Header -->
   <header>
-    <div class="hd-top">
-      <div class="masthead">K1 Control</div>
-      <div class="tagline">AI Innovation Center · FIPSE Grant</div>
-    </div>
-    <div class="hd-meta">
-      <div class="status-group">
-        <div class="status-dot-wrap">
-          <div class="dot"></div>
-          <span>Robot connected</span>
-        </div>
-        <div class="ip-tag">192.168.0.176</div>
+    <div class="logo">
+      <div class="logo-icon">🤖</div>
+      <div>
+        <div class="logo-title">K1 Robot Interface</div>
+        <div class="logo-sub">AI INNOVATION CENTER · HILLSBOROUGH COLLEGE</div>
       </div>
-      <a href="https://docs.boosterrobotics.com/" target="_blank" class="booster-link">Booster firmware manual</a>
+    </div>
+    <div class="status-pill" onclick="checkHealth()">
+      <div class="dot" id="dot"></div>
+      <span id="statusText">CHECKING...</span>
     </div>
   </header>
 
-  <main>
+  <!-- Robot bar -->
+  <div class="robot-bar">
+    <div class="robot-avatar">🤖</div>
+    <div>
+      <div class="robot-name">K1 — Booster Robotics</div>
+      <div class="robot-status" id="robotStatus">Waiting for connection...</div>
+    </div>
+    <div class="speaking-badge" id="speakBadge">
+      <div class="speak-dot"></div> SPEAKING
+    </div>
+  </div>
 
-    <!-- ════════════════════════════════════════
-         LEFT — Controls
-    ═════════════════════════════════════════ -->
-    <section class="col">
-      <div class="col-title">Controls</div>
-      <div class="left-scroll">
-
-        <span class="lbl">Movement</span>
-        <div class="move-pad">
-          <div></div>
-          <div class="mc">
-            <button class="mb" onclick="sendMove('walk_forward')">↑</button>
-            <div class="ml">Walk forward</div>
-          </div>
-          <div></div>
-
-          <div class="mc">
-            <button class="mb" onclick="sendMove('turn_left')">←</button>
-            <div class="ml">Turn left</div>
-          </div>
-          <div class="mc">
-            <button class="mb" onclick="sendMove('stop')">◎</button>
-            <div class="ml">Stop</div>
-          </div>
-          <div class="mc">
-            <button class="mb" onclick="sendMove('turn_right')">→</button>
-            <div class="ml">Turn right</div>
-          </div>
-
-          <div></div>
-          <div class="mc">
-            <button class="mb" onclick="sendMove('walk_backward')">↓</button>
-            <div class="ml">Walk backward</div>
-          </div>
-          <div></div>
-        </div>
-
-        <hr class="sep">
-
-        <!-- Gestures -->
-        <span class="lbl">Gestures</span>
-        <div class="gest-grid">
-
-          <!-- Wave -->
-          <button class="gb" onclick="sendGesture('wave')">
-            <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
-              <circle cx="20" cy="7" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
-              <line x1="20" y1="12" x2="20" y2="30" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M20 17 Q28 10 33 5" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-              <line x1="20" y1="17" x2="12" y2="24" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="20" y1="30" x2="15" y2="44" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="20" y1="30" x2="25" y2="44" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M34 3 Q36 1 38 3" stroke="#2c2c2c" stroke-width="1" stroke-linecap="round" fill="none"/>
-              <path d="M32 1 Q35 -1 37 1" stroke="#2c2c2c" stroke-width="1" stroke-linecap="round" fill="none"/>
-            </svg>
-            <span>Wave</span>
-          </button>
-
-          <!-- Nod -->
-          <button class="gb" onclick="sendGesture('nod')">
-            <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
-              <circle cx="20" cy="9" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
-              <path d="M15 9 Q15 4 20 4" stroke="#2c2c2c" stroke-width="1" stroke-linecap="round" fill="none"/>
-              <polygon points="20,2 18,5 22,5" fill="#2c2c2c"/>
-              <line x1="20" y1="14" x2="20" y2="31" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="20" y1="18" x2="11" y2="25" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="20" y1="18" x2="29" y2="25" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="20" y1="31" x2="15" y2="45" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="20" y1="31" x2="25" y2="45" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            <span>Nod</span>
-          </button>
-
-          <!-- Thumbs up -->
-          <button class="gb" onclick="sendGesture('thumbs_up')">
-            <svg width="38" height="50" viewBox="0 0 40 52" fill="none">
-              <circle cx="20" cy="7" r="5" stroke="#2c2c2c" stroke-width="1.5"/>
-              <line x1="20" y1="12" x2="20" y2="30" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="20" y1="17" x2="32" y2="20" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <rect x="32" y="18" width="6" height="6" rx="1" stroke="#2c2c2c" stroke-width="1.2" fill="none"/>
-              <line x1="34" y1="18" x2="34" y2="12" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="20" y1="17" x2="11" y2="24" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="20" y1="30" x2="15" y2="44" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="20" y1="30" x2="25" y2="44" stroke="#2c2c2c" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            <span>Thumbs up</span>
-          </button>
-        </div>
-
-        <hr class="sep">
-
-        <!-- Mode -->
-        <span class="lbl">Robot mode</span>
-        <div style="display:flex;gap:6px;margin-bottom:0.6rem;">
-          <button class="sec"   id="btn-damp" onclick="setMode('damp')" style="flex:1;">Damp</button>
-          <button style="flex:1;border-color:#b06000;color:#b06000;" id="btn-prep" onclick="setMode('prep')">Prep</button>
-          <button style="flex:1;border-color:#2c5aa0;color:#2c5aa0;" onclick="standUp()">Stand</button>
-          <button class="green" id="btn-walk" onclick="setMode('walk')" style="flex:1;">Walk</button>
-        </div>
-
-        <!-- Voice -->
-        <span class="lbl">Voice</span>
-        <div style="position:relative;margin-bottom:0.6rem;">
-          <select>
-            <optgroup label="Piper TTS — local">
-              <option>Lessac · US male (default)</option>
-              <option>Amy · US female</option>
-              <option>Kathleen · US female</option>
-              <option>Ryan · US male</option>
-              <option>Danny · US male, deep</option>
-              <option>Alan · British male</option>
-              <option>Cori · British female</option>
-            </optgroup>
-            <optgroup label="OpenAI TTS — API key required">
-              <option>Nova · warm female</option>
-              <option>Alloy · neutral</option>
-              <option>Echo · male</option>
-              <option>Shimmer · soft female</option>
-            </optgroup>
-          </select>
-          <svg style="position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="#666" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
-        </div>
-
-        <!-- Volume -->
-        <span class="lbl">Volume</span>
-        <div class="sl-row" style="margin-bottom:.55rem;">
-          <input type="range" min="0" max="100" value="70" id="vol-r">
-          <span class="sl-val" id="vol-v">70%</span>
-        </div>
-
-        <!-- Speed -->
-        <span class="lbl">Response speed</span>
-        <div class="sl-row">
-          <input type="range" min="1" max="10" value="5" id="spd-r">
-          <span class="sl-val" id="spd-v">Normal</span>
-        </div>
-
+  <!-- Chat -->
+  <div class="chat-area" id="chatArea">
+    <div class="welcome" id="welcome">
+      <div class="welcome-icon">🤖</div>
+      <div class="welcome-title">Hello, I'm K1!</div>
+      <div class="welcome-sub">
+        Your AI robot assistant from the Hillsborough College AI Innovation Center, 
+        in partnership with URG Americas. Type a message and I'll respond out loud!
       </div>
-    </section>
-
-    <!-- ════════════════════════════════════════
-         MIDDLE — Conversation
-    ═════════════════════════════════════════ -->
-    <section class="col">
-      <div class="col-title">Conversation</div>
-      <div class="conv-panel">
-
-        <!-- LLM selector -->
-        <div class="llm-bar">
-          <div class="llm-pills">
-            <button class="llm-pill active" id="pill-ollama"    onclick="selectLLM('ollama')">Ollama (local)</button>
-            <button class="llm-pill"         id="pill-anthropic" onclick="selectLLM('anthropic')">Anthropic</button>
-            <button class="llm-pill"         id="pill-openai"    onclick="selectLLM('openai')">OpenAI</button>
-          </div>
-          <div id="api-key-area" style="display:none;">
-            <div class="api-key-row">
-              <input type="password" id="api-key-input" placeholder="Paste session API key…">
-              <button onclick="applyKey()" style="flex:none;padding:6px 10px;font-size:10px;">Apply</button>
-              <button class="sec" onclick="clearKey()" style="flex:none;padding:6px 8px;font-size:10px;">✕</button>
-            </div>
-            <div class="session-note">Key stored in memory only — cleared when you close or refresh this tab.</div>
-          </div>
-        </div>
-
-        <!-- Chat history -->
-        <div class="chat-history" id="chat-history">
-          <div class="cm user">
-            <div class="who">You</div>
-            <div class="bub">What is your name?</div>
-          </div>
-          <div class="cm robot">
-            <div class="who">K1 · Ollama / Llama 3</div>
-            <div class="bub">I am K1, a humanoid robot at Hillsborough College's AI Innovation Center. I'm here to help demonstrate the integration of large language models with physical robotics. How can I help you today?</div>
-          </div>
-          <div class="cm user">
-            <div class="who">You</div>
-            <div class="bub">Can you wave hello to everyone?</div>
-          </div>
-          <div class="cm robot">
-            <div class="who">K1 · Ollama / Llama 3</div>
-            <div class="bub">Of course! Hello everyone, welcome to the AI Innovation Center! [ACTION: wave]</div>
-          </div>
-        </div>
-
-        <hr class="chat-sep">
-
-        <!-- Input -->
-        <div class="chat-foot">
-          <textarea class="msg-in" id="msg-in" placeholder="Type a message or command for K1…"></textarea>
-          <div class="chat-btns">
-            <button style="flex:2" onclick="sendMsg()">Send</button>
-            <button class="sec" style="flex:1" onclick="clearChat()">Clear</button>
-          </div>
-        </div>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="send('Introduce yourself')">👋 Introduce yourself</button>
+        <button class="quick-btn" onclick="send('What is artificial intelligence?')">🧠 What is AI?</button>
+        <button class="quick-btn" onclick="send('What can students learn here?')">🎓 What can I learn?</button>
+        <button class="quick-btn" onclick="send('Tell me something interesting about robots')">🤖 Robot facts</button>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- ════════════════════════════════════════
-         RIGHT — Live
-    ═════════════════════════════════════════ -->
-    <section class="col">
-      <div class="col-title">Live</div>
+  <!-- Input -->
+  <div class="input-area">
+    <div class="input-row">
+      <textarea id="msgInput"
+        placeholder="Type a message — K1 will respond out loud..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
+    </div>
+    <div class="input-hint">
+      <span>ENTER to send · SHIFT+ENTER for new line</span>
+      <button class="reset-btn" onclick="resetChat()">↺ RESET CONVERSATION</button>
+    </div>
+  </div>
 
-      <!-- Real / Isaac toggle -->
-      <div class="view-toggle">
-        <button class="vt-btn active" id="vt-real"  onclick="setView('real')">Real camera</button>
-        <button class="vt-btn"        id="vt-isaac" onclick="setView('isaac')">Isaac sim</button>
-      </div>
+  <footer>
+    AI Innovation Center · Hillsborough College · Tampa, FL · In partnership with URG Americas
+    &nbsp;|&nbsp; K1 Powered by Ollama + Piper TTS
+  </footer>
 
-      <!-- Viewport -->
-      <div class="view-port">
-        <!-- Real camera — MJPEG stream from Flask /api/camera/stream -->
-        <div id="cam-real" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-          <img
-            id="camera-img"
-            src="/api/camera/stream"
-            style="width:100%;height:100%;object-fit:cover;"
-            onerror="cameraError()"
-            alt="K1 Live Camera Feed"
-          >
-        </div>
-
-        <!-- Isaac Sim placeholder -->
-        <div class="isaac-placeholder" id="cam-isaac">
-          <div class="isaac-logo">NVIDIA Isaac Sim</div>
-          <div class="isaac-info">Streaming from your inference server.<br>Make sure Isaac Sim is running with<br>WebRTC streaming enabled.</div>
-          <div class="isaac-url">http://192.168.0.100:8211/streaming</div>
-          <button class="isaac-connect" onclick="launchIsaac()">Connect to simulator</button>
-        </div>
-      </div>
-
-      <!-- Robot status strip -->
-      <div class="status-strip">
-        <div class="status-strip-title">Robot status</div>
-        <div class="status-rows">
-          <div class="sr">
-            <span class="sr-key">Mode</span>
-            <span class="sr-val ok" id="st-mode">Walk</span>
-          </div>
-          <div class="sr">
-            <span class="sr-key">Battery</span>
-            <span class="sr-val ok" id="st-batt">87%</span>
-          </div>
-          <div class="sr">
-            <span class="sr-key">Latency</span>
-            <span class="sr-val" id="st-lat">24 ms</span>
-          </div>
-          <div class="sr">
-            <span class="sr-key">LLM provider</span>
-            <span class="sr-val" id="st-llm">Ollama / Llama 3</span>
-          </div>
-          <div class="sr">
-            <span class="sr-key">Last action</span>
-            <span class="sr-val action" id="st-action">wave executed</span>
-          </div>
-          <div class="sr">
-            <span class="sr-key">View</span>
-            <span class="sr-val" id="st-view">Real camera</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <footer>K1 Wizard of Oz Dashboard &nbsp;·&nbsp; Hillsborough College AI Innovation Center &nbsp;·&nbsp; FIPSE Grant Program</footer>
 </div>
 
 <script>
-  // ── Config ──────────────────────────────────────────────────
-  const API = '';  // Empty = same origin (Flask serves the dashboard)
+const FLASK = "http://localhost:5000";
 
-  // ── State ───────────────────────────────────────────────────
-  let currentLLM      = 'ollama';
-  let conversationHistory = [];  // Sent to backend for multi-turn context
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  checkHealth();
+  document.getElementById('msgInput').focus();
+});
 
-  const llmLabels = {
-    ollama:    'Ollama / Llama 3',
-    anthropic: 'Anthropic / Claude',
-    openai:    'OpenAI / GPT-4o'
-  };
-
-  // ── Sliders ──────────────────────────────────────────────────
-  const volR = document.getElementById('vol-r');
-  const volV = document.getElementById('vol-v');
-  const spdR = document.getElementById('spd-r');
-  const spdV = document.getElementById('spd-v');
-  const spdL = ['','Very slow','Slow','Slower','Moderate','Normal','Quick','Fast','Very fast','Rapid','Immediate'];
-  volR.addEventListener('input', e => { volV.textContent = Math.round(e.target.value) + '%'; });
-  spdR.addEventListener('input', e => { spdV.textContent = spdL[Math.round(e.target.value)]; });
-
-  // ── Utility ──────────────────────────────────────────────────
-  function esc(t) {
-    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// Health check
+async function checkHealth() {
+  const dot = document.getElementById('dot');
+  const txt = document.getElementById('statusText');
+  const status = document.getElementById('robotStatus');
+  try {
+    const r = await fetch(`${FLASK}/health`, { signal: AbortSignal.timeout(4000) });
+    const d = await r.json();
+    if (d.ollama === 'ok') {
+      dot.className = 'dot ok';
+      txt.textContent = 'ONLINE';
+      status.textContent = `Connected · ${d.model} · K1 @ ${d.k1_ip}`;
+    } else {
+      dot.className = 'dot err';
+      txt.textContent = 'OLLAMA DOWN';
+      status.textContent = 'Ollama not reachable — is it running?';
+    }
+  } catch(e) {
+    dot.className = 'dot err';
+    txt.textContent = 'OFFLINE';
+    status.textContent = 'Flask server not reachable — is app.py running?';
   }
+}
 
-  async function post(path, body) {
-    const res = await fetch(API + path, {
-      method:      'POST',
-      headers:     { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body:        JSON.stringify(body),
+// Send message
+async function send(overrideText) {
+  const input = document.getElementById('msgInput');
+  const text = overrideText || input.value.trim();
+  if (!text) return;
+
+  // Hide welcome
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  input.value = '';
+  autoResize(input);
+  document.getElementById('sendBtn').disabled = true;
+
+  addMessage('user', text);
+  const thinking = addThinking();
+
+  try {
+    // Show speaking indicator
+    document.getElementById('speakBadge').classList.add('on');
+    document.getElementById('robotStatus').textContent = 'Thinking...';
+
+    const r = await fetch(`${FLASK}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
     });
-    return res.json();
+    const d = await r.json();
+    thinking.remove();
+
+    if (d.error) throw new Error(d.error);
+
+    addMessage('robot', d.response);
+    document.getElementById('robotStatus').textContent = d.spoken ? 'Speaking response...' : 'Response ready (speak error: ' + d.speak_error + ')';
+
+    // Hide speaking badge after a delay
+    setTimeout(() => {
+      document.getElementById('speakBadge').classList.remove('on');
+      document.getElementById('robotStatus').textContent = 'Ready';
+    }, 4000);
+
+  } catch(e) {
+    thinking.remove();
+    addMessage('robot', `⚠️ Error: ${e.message}`);
+    document.getElementById('speakBadge').classList.remove('on');
+    document.getElementById('robotStatus').textContent = 'Error — check Flask server';
+  } finally {
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('msgInput').focus();
   }
+}
 
-  async function get(path) {
-    const res = await fetch(API + path, { credentials: 'include' });
-    return res.json();
-  }
+// Reset conversation
+async function resetChat() {
+  try {
+    await fetch(`${FLASK}/reset`, { method: 'POST' });
+  } catch(e) {}
+  document.getElementById('chatArea').innerHTML = `
+    <div style="text-align:center;padding:20px;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.72rem;">
+      Conversation reset. Start a new one!
+    </div>`;
+}
 
-  // ── Chat history DOM helper ───────────────────────────────────
-  function appendMessage(role, text, provider) {
-    const h    = document.getElementById('chat-history');
-    const div  = document.createElement('div');
-    div.className = `cm ${role}`;
-    const who  = role === 'user'
-      ? 'You'
-      : `K1 · ${llmLabels[provider] || provider}`;
-    div.innerHTML = `<div class="who">${esc(who)}</div><div class="bub">${esc(text)}</div>`;
-    h.appendChild(div);
-    h.scrollTop = h.scrollHeight;
-    return div;
-  }
+// Add message bubble
+function addMessage(role, text) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="avatar">${role === 'robot' ? '🤖' : '🧑'}</div>
+    <div>
+      <div class="bubble">${esc(text)}</div>
+      <div class="msg-time">${now()}</div>
+    </div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
 
-  function appendError(msg) {
-    const h   = document.getElementById('chat-history');
-    const div = document.createElement('div');
-    div.className = 'cm';
-    div.innerHTML = `<div class="who" style="color:#c0392b">Error</div><div class="bub" style="background:#fdf0f0;color:#c0392b">${esc(msg)}</div>`;
-    h.appendChild(div);
-    h.scrollTop = h.scrollHeight;
-  }
+// Thinking dots
+function addThinking() {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg robot';
+  div.innerHTML = `
+    <div class="avatar">🤖</div>
+    <div class="thinking">
+      <div class="td"></div><div class="td"></div><div class="td"></div>
+    </div>`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div;
+}
 
-  function setLoading(on) {
-    const btn = document.querySelector('.chat-btns button:first-child');
-    btn.textContent  = on ? 'Sending…' : 'Send';
-    btn.disabled     = on;
-  }
-
-  // ── Send chat message ─────────────────────────────────────────
-  async function sendMsg() {
-    const inp  = document.getElementById('msg-in');
-    const text = inp.value.trim();
-    if (!text) return;
-
-    // Show user message immediately
-    appendMessage('user', text, currentLLM);
-    conversationHistory.push({ role: 'user', content: text });
-    inp.value = '';
-    setLoading(true);
-
-    try {
-      const data = await post('/api/chat/send', {
-        message:  text,
-        provider: currentLLM,
-        history:  conversationHistory.slice(-10),  // Last 10 turns for context
-      });
-
-      if (data.error) {
-        appendError(data.error);
-      } else {
-        appendMessage('robot', data.clean_response, currentLLM);
-        conversationHistory.push({ role: 'assistant', content: data.clean_response });
-
-        // Update status strip
-        if (data.action) {
-          document.getElementById('st-action').textContent = `${data.action} executed`;
-        }
-      }
-    } catch (err) {
-      appendError('Could not reach the backend. Is Flask running?');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function clearChat() {
-    document.getElementById('chat-history').innerHTML = '';
-    conversationHistory = [];
-  }
-
-  document.getElementById('msg-in').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
-  });
-
-  // ── Battery alerts ────────────────────────────────────────
-  function showBatteryAlert(msg, level) {
-    const el = document.getElementById('battery-alert');
-    el.textContent  = '⚠️ ' + msg;
-    el.className    = level;
-    el.style.display = 'block';
-  }
-  function hideBatteryAlert() {
-    const el = document.getElementById('battery-alert');
-    el.style.display = 'none';
-    el.className     = '';
-  }
-
-  // ── Stand up ──────────────────────────────────────────────
-  async function standUp() {
-    try {
-      const data = await post('/api/robot/standup', {});
-      document.getElementById('st-action').textContent = 'stand up';
-      if (!data.ok) console.warn('[standup] Backend returned ok:false', data);
-    } catch (err) {
-      console.error('[standup] Error:', err);
-    }
-  }
-
-  // ── Movement ──────────────────────────────────────────────────
-  async function sendMove(command) {
-    try {
-      const data = await post('/api/robot/move', { command });
-      document.getElementById('st-action').textContent = `${command.replace('_',' ')}`;
-      if (!data.ok) console.warn('[move] Backend returned ok:false', data);
-    } catch (err) {
-      console.error('[move] Error:', err);
-    }
-  }
-
-  // ── Gestures ──────────────────────────────────────────────────
-  async function sendGesture(name) {
-    try {
-      const data = await post('/api/robot/gesture', { gesture: name });
-      document.getElementById('st-action').textContent = `${name} executed`;
-      if (!data.ok) console.warn('[gesture] Backend returned ok:false', data);
-    } catch (err) {
-      console.error('[gesture] Error:', err);
-    }
-  }
-
-  // ── Robot mode ────────────────────────────────────────────────
-  async function setMode(m) {
-    // Update UI immediately for responsiveness
-    document.getElementById('btn-walk').className = m === 'walk' ? 'green' : 'sec';
-    document.getElementById('btn-damp').className = m === 'damp' ? 'active-dark' : 'sec';
-    document.getElementById('st-mode').textContent = m === 'walk' ? 'Walk' : 'Damp';
-    document.getElementById('st-mode').className   = m === 'walk' ? 'sr-val ok' : 'sr-val warn';
-
-    try {
-      await post('/api/robot/mode', { mode: m });
-    } catch (err) {
-      console.error('[mode] Error:', err);
-    }
-  }
-
-  // ── LLM selector ─────────────────────────────────────────────
-  function selectLLM(p) {
-    currentLLM = p;
-    ['ollama','anthropic','openai'].forEach(id => {
-      document.getElementById('pill-' + id).classList.toggle('active', id === p);
-    });
-    document.getElementById('api-key-area').style.display = (p === 'ollama') ? 'none' : 'block';
-    document.getElementById('st-llm').textContent = llmLabels[p];
-  }
-
-  // ── Session API key ───────────────────────────────────────────
-  async function applyKey() {
-    const key = document.getElementById('api-key-input').value.trim();
-    if (!key) return;
-
-    try {
-      const data = await post('/api/session/set-key', {
-        provider: currentLLM,
-        api_key:  key,
-      });
-      if (data.ok) {
-        document.getElementById('api-key-input').style.borderColor = '#3a8a3a';
-      } else {
-        document.getElementById('api-key-input').style.borderColor = '#c0392b';
-      }
-    } catch (err) {
-      console.error('[api-key] Error:', err);
-    }
-  }
-
-  async function clearKey() {
-    document.getElementById('api-key-input').value = '';
-    document.getElementById('api-key-input').style.borderColor = '';
-    try {
-      await post('/api/session/clear-key', { provider: currentLLM });
-    } catch (err) {
-      console.error('[clear-key] Error:', err);
-    }
-  }
-
-  // ── Robot status polling ──────────────────────────────────────
-  async function pollStatus() {
-    try {
-      const data = await get('/api/robot/status');
-
-      // Connection dot
-      const dot = document.querySelector('.dot');
-      dot.style.background = data.connected ? '#4caf50' : '#e74c3c';
-
-      // IP tag
-      const ipTag = document.querySelector('.ip-tag');
-      if (ipTag) ipTag.style.opacity = data.connected ? '1' : '0.4';
-
-      // Status strip values
-      if (data.battery !== null && data.battery !== undefined) {
-        const battEl = document.getElementById('st-batt');
-        battEl.textContent = data.battery + '%';
-        battEl.className   = data.battery > 20 ? 'sr-val ok' : 'sr-val warn';
-
-        // Show battery warning banner
-        if (data.critical) {
-          showBatteryAlert('CRITICAL: ' + data.battery + '% battery — robot may fall! Charge immediately.', 'critical');
-        } else if (data.warning) {
-          showBatteryAlert('LOW BATTERY: ' + data.battery + '% — prepare to charge soon.', 'warning');
-        } else {
-          hideBatteryAlert();
-        }
-      }
-      if (data.latency_ms !== null && data.latency_ms !== undefined) {
-        document.getElementById('st-lat').textContent = data.latency_ms + ' ms';
-      }
-      if (data.mode) {
-        document.getElementById('st-mode').textContent = data.mode;
-        document.getElementById('st-mode').className   =
-          data.mode === 'walk' ? 'sr-val ok' : 'sr-val warn';
-      }
-    } catch (err) {
-      // Flask not running — show disconnected
-      document.querySelector('.dot').style.background = '#e74c3c';
-    }
-  }
-
-  // Poll every 10 seconds
-  pollStatus();
-  setInterval(pollStatus, 10000);
-
-  // ── Session cleanup on tab close ─────────────────────────────
-  window.addEventListener('beforeunload', () => {
-    navigator.sendBeacon(API + '/api/session/logout', '{}');
-  });
-
-  // ── Camera ────────────────────────────────────────────────────
-  function cameraError() {
-    // If MJPEG stream fails, show offline placeholder
-    const img = document.getElementById('camera-img');
-    if (img) {
-      img.style.display = 'none';
-      const parent = document.getElementById('cam-real');
-      parent.innerHTML = `
-        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-          <svg width="36" height="28" viewBox="0 0 36 28" fill="none" opacity=".35">
-            <rect x="1" y="5" width="34" height="22" rx="3" stroke="#fff" stroke-width="1.5"/>
-            <circle cx="18" cy="16" r="7" stroke="#fff" stroke-width="1.5"/>
-            <circle cx="18" cy="16" r="3" stroke="#fff" stroke-width="1"/>
-            <path d="M12 5V3a2 2 0 012-2h8a2 2 0 012 2v2" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <span style="font-family:'Inter',sans-serif;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;">
-            Camera offline
-          </span>
-          <button onclick="retryCamera()" style="font-size:10px;padding:4px 10px;border:1px solid #666;color:#888;background:transparent;cursor:pointer;font-family:'Inter',sans-serif;">
-            Retry
-          </button>
-        </div>`;
-    }
-  }
-
-  function retryCamera() {
-    const parent = document.getElementById('cam-real');
-    parent.innerHTML = `<img id="camera-img" src="/api/camera/stream"
-      style="width:100%;height:100%;object-fit:cover;"
-      onerror="cameraError()" alt="K1 Live Camera Feed">`;
-  }
-
-  // Check camera status on load
-  async function checkCameraStatus() {
-    try {
-      const data = await get('/api/camera/status');
-      const dot  = document.querySelector('.dot');
-      if (data.live) {
-        dot.style.outline = '2px solid #4caf50';
-      }
-    } catch (e) { /* silent */ }
-  }
-  checkCameraStatus();
-
-
-  function setView(v) {
-    document.getElementById('vt-real').classList.toggle('active',  v === 'real');
-    document.getElementById('vt-isaac').classList.toggle('active', v === 'isaac');
-    document.getElementById('cam-real').style.display = v === 'real' ? 'flex' : 'none';
-    document.getElementById('cam-isaac').classList.toggle('visible', v === 'isaac');
-    document.getElementById('st-view').textContent = v === 'real' ? 'Real camera' : 'Isaac sim';
-  }
-
-  function launchIsaac() {
-    window.open('http://192.168.0.100:8211/streaming/webrtc-demo/?server=192.168.0.100','_blank');
-  }
+// Helpers
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+function now() {
+  return new Date().toLocaleTimeString('en-US', { hour12: false });
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 </script>
 </body>
 </html>
