@@ -827,13 +827,23 @@
 
         <!-- Robot Mode -->
         <span class="lbl">Robot mode</span>
-        <div style="display:flex;gap:6px;margin-bottom:0.5rem;">
-          <button id="btn-prep" class="warn" onclick="setMode('prep')" style="flex:1;">Prep</button>
-          <button id="btn-walk" class="green" onclick="setMode('walk')" style="flex:1;">Walk</button>
-          <button id="btn-damp" class="sec"   onclick="setMode('damp')" style="flex:1;">Damp</button>
+        <div style="font-family:'Inter',sans-serif;font-size:9px;color:#2c5aa0;font-weight:600;margin-bottom:4px;letter-spacing:0.3px;">
+          ▲ UP: Damp → Prep → Stand Up → Walk
         </div>
-        <div style="font-family:'Inter',sans-serif;font-size:9px;color:#aaa;margin-bottom:0.6rem;line-height:1.5;">
-          Sequence: Damp → Prep → Walk. Never skip steps.
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <button id="btn-prep"   class="warn"  onclick="setMode('prep')"   style="flex:1;">Prep</button>
+          <button id="btn-standup" class="green" onclick="setMode('walk')"  style="flex:1;">Stand Up</button>
+          <button id="btn-walk"   class="green" onclick="" style="flex:1;opacity:0.4;cursor:not-allowed;" disabled title="Walk enabled after standing">Walk</button>
+        </div>
+        <div style="font-family:'Inter',sans-serif;font-size:9px;color:#c0392b;font-weight:600;margin-bottom:4px;letter-spacing:0.3px;">
+          ▼ DOWN: Walk → Prep → Lie Down → Damp
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <button id="btn-liedown" class="warn"  onclick="lieDown()"       style="flex:1;">Lie Down</button>
+          <button id="btn-damp"    class="sec"   onclick="setMode('damp')" style="flex:1;" title="Only from Prep or lying down">Damp</button>
+        </div>
+        <div style="font-family:'Inter',sans-serif;font-size:9px;color:#c0392b;margin-bottom:0.6rem;line-height:1.5;">
+          ⚠ Never Damp from standing — use Prep → Lie Down first.
         </div>
 
         <!-- Voice -->
@@ -1101,9 +1111,44 @@ function updateModeUI(mode) {
   const modeEl = document.getElementById('st-mode');
   modeEl.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
   modeEl.className   = mode === 'walk' ? 'sr-val ok' : mode === 'prep' ? 'sr-val warn' : 'sr-val';
-  document.getElementById('btn-prep').className = mode === 'prep' ? 'warn active-dark' : 'warn';
-  document.getElementById('btn-walk').className = mode === 'walk' ? 'active-green'    : 'green';
-  document.getElementById('btn-damp').className = mode === 'damp' ? 'active-dark'     : 'sec';
+  document.getElementById('btn-prep').className    = mode === 'prep' ? 'warn active-dark' : 'warn';
+  document.getElementById('btn-standup').className = mode === 'walk' ? 'active-green'     : 'green';
+  document.getElementById('btn-damp').className    = mode === 'damp' ? 'active-dark'      : 'sec';
+  document.getElementById('btn-liedown').className = mode === 'damp' ? 'sec'              : 'warn';
+  // Enable Walk button only when standing
+  const walkBtn = document.getElementById('btn-walk');
+  if (mode === 'walk') {
+    walkBtn.disabled = false;
+    walkBtn.style.opacity = '1';
+    walkBtn.style.cursor  = 'pointer';
+    walkBtn.onclick = () => toast('Already in Walk mode — use movement controls.', '');
+  } else {
+    walkBtn.disabled = true;
+    walkBtn.style.opacity = '0.4';
+    walkBtn.style.cursor  = 'not-allowed';
+  }
+}
+
+// ── Lie Down ──────────────────────────────────────────────
+async function lieDown() {
+  if (!safetyConfirmed) { toast('Confirm robot position first.', 'err'); return; }
+  toast('Sending Lie Down command…');
+  try {
+    const r = await fetch(`${FLASK}/api/liedown`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const d = await r.json();
+    if (d.ok) {
+      updateModeUI('damp');
+      toast('Robot is lying down safely.');
+    } else {
+      toast((d.error || 'Lie Down failed') + (d.detail ? ' — ' + d.detail : ''), 'err', 6000);
+    }
+  } catch(e) {
+    toast('Server unreachable.', 'err');
+  }
 }
 
 // ── Movement ──────────────────────────────────────────────────
