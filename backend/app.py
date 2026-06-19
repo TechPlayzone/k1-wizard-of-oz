@@ -254,12 +254,6 @@ def set_mode():
     current = robot.current_mode
 
     # ── Safety guards ─────────────────────────────────────────
-    if target_mode == 'prep' and current == 'walk':
-        return jsonify({
-            "error": "Cannot go directly from Walk to Prep.",
-            "detail": "Click Damp first to safely lower the robot, then Prep."
-        }), 400
-
     if target_mode == 'walk' and current == 'damp':
         return jsonify({
             "error": "Cannot go directly from Damp to Walk.",
@@ -351,7 +345,7 @@ def gesture():
     gesture_name = data.get('gesture', '')
 
     if gesture_name not in ('wave', 'nod', 'thumbs_up'):
-        return jsonify({"error": f"Unknown gesture: {gesture_name}"}), 400
+        return jsonify({"error": f"Unknown gesture: {gesture_name}. For dances use /api/dance"}), 400
 
     try:
         def _gesture():
@@ -359,6 +353,49 @@ def gesture():
         t = threading.Thread(target=_gesture, daemon=True)
         t.start()
         return jsonify({"ok": True, "gesture": gesture_name})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# =============================================================================
+# DANCE
+# =============================================================================
+
+@app.route('/api/dance', methods=['POST'])
+def dance():
+    """
+    Trigger a dance gesture.
+
+    Body: {
+        "dance_id":   0-7 | 1000,          (upper body, api 2016)
+        "whole_body": false                 (true = whole body, api 2029)
+    }
+
+    Upper body DanceId (api 2016):
+        0=NewYear, 1=Nezha, 2=TowardsFuture, 3=Dabbing,
+        4=Ultraman, 5=Respect, 6=Cheering, 7=LuckyCat, 1000=Stop
+
+    Whole body WholeBodyDanceId (api 2029):
+        0=ArabicDance, 1=MichaelDance1, 2=MichaelDance2,
+        3=MichaelDance3, 4=MoonWalk, 5=BoxingStyleKick, 6=RoundhouseKick
+    """
+    if not _safety_confirmed:
+        return jsonify({"error": "Confirm robot position first."}), 403
+
+    data       = request.get_json() or {}
+    dance_id   = data.get('dance_id', 0)
+    whole_body = data.get('whole_body', False)
+
+    try:
+        def _dance():
+            robot.dance(dance_id, whole_body=whole_body)
+        t = threading.Thread(target=_dance, daemon=True)
+        t.start()
+        return jsonify({
+            "ok":         True,
+            "dance_id":   dance_id,
+            "whole_body": whole_body,
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -568,6 +605,68 @@ def camera_status():
         "active":    camera_handler._running,
         "has_frame": camera_handler.has_frame,
     })
+
+
+# =============================================================================
+# TTS SETTINGS
+# =============================================================================
+
+@app.route('/api/tts/voice', methods=['POST'])
+def set_voice():
+    """Switch Piper TTS voice model."""
+    data  = request.get_json() or {}
+    voice = data.get('voice', 'en_US-lessac-medium')
+    path  = f"/home/booster/k1-wizard-of-oz/voices/{voice}.onnx"
+    if not os.path.exists(path):
+        return jsonify({"ok": False, "error": f"Voice model not found: {voice}"}), 404
+    cfg.PIPER_VOICE_PATH = path
+    cfg.PIPER_VOICE = voice
+    print(f"[TTS] Voice changed to {voice}")
+    return jsonify({"ok": True, "voice": voice})
+
+
+@app.route('/api/tts/settings', methods=['POST'])
+def tts_settings():
+    """Update TTS speed. Body: { "speed": "slow"|"normal"|"fast"|"very_fast" }"""
+    from tts import set_speed
+    data  = request.get_json() or {}
+    speed = data.get('speed', 'fast')
+    scale_map = {'slow': 1.3, 'normal': 1.0, 'fast': 0.8, 'very_fast': 0.6}
+    scale = scale_map.get(speed, 0.8)
+    set_speed(scale)
+    return jsonify({"ok": True, "speed": speed, "length_scale": scale})
+
+
+# =============================================================================
+# REFRESH STATUS
+# =============================================================================
+
+
+@app.route("/api/volume", methods=["POST"])
+def set_volume():
+    """Set K1 speaker volume via pactl."""
+    data = request.get_json() or {}
+    level = data.get("level", 70)
+    level = max(0, min(100, int(level)))
+    try:
+        import subprocess
+        subprocess.run(["pactl", "set-sink-volume", "0", f"{level}%"], timeout=5)
+        return jsonify({"ok": True, "volume": level})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+@app.route('/api/refresh-status', methods=['POST'])
+def refresh_status():
+    """Query actual robot mode from RPC and update cached state."""
+    try:
+        from k1_handler import get_robot_mode
+        rpc_mode, mode_str = get_robot_mode()
+        if rpc_mode >= 0:
+            robot.current_mode = mode_str
+            return jsonify({"ok": True, "mode": mode_str, "rpc_mode": rpc_mode})
+        return jsonify({"ok": False, "error": "Could not query robot mode"}), 500
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 # =============================================================================

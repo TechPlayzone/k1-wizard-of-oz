@@ -2,7 +2,7 @@
 camera.py
 K1 camera stream via ROS2 — MJPEG for browser dashboard.
 
-Subscribes to /boostercamera/head/rgb (confirmed working topic on K1).
+Subscribes to /image_left_raw (confirmed working topic on K1).
 Handles multiple encodings: rgb8, bgr8, mono8, yuv422/yuyv.
 Streams as MJPEG multipart via Flask /api/camera/stream route.
 
@@ -68,10 +68,10 @@ if _ros_available and _cv_available:
     class _CameraNode(Node):
         """
         ROS2 subscriber node for K1 camera stream.
-        Topic: /boostercamera/head/rgb (confirmed working on K1)
+        Topic: /image_left_raw (confirmed working on K1)
         Handles rgb8, bgr8, mono8, yuv422/yuyv encodings.
         """
-        CAMERA_TOPIC   = "/boostercamera/head/rgb"
+        CAMERA_TOPIC   = "/image_left_raw"
         JPEG_QUALITY   = 80
         STREAM_WIDTH   = 640
         STREAM_HEIGHT  = 480
@@ -113,11 +113,7 @@ if _ros_available and _cv_available:
             arr = np.frombuffer(msg.data, dtype=np.uint8)
             enc = msg.encoding.lower()
 
-            if enc == "nv12":
-                yuv = arr.reshape((msg.height * 3 // 2, msg.width))
-                return cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_NV12)
-
-            elif enc == "rgb8":
+            if enc == "rgb8":
                 img = arr.reshape((msg.height, msg.width, 3))
                 return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
@@ -186,7 +182,7 @@ class CameraHandler:
             self._node = _CameraNode()
             _rpc_node._executor.add_node(self._node)
             self._running = True
-            print("[camera] Camera node started — streaming /boostercamera/head/rgb")
+            print("[camera] Camera node started — streaming /image_left_raw")
 
         except Exception as e:
             print(f"[camera] Failed to start: {e}")

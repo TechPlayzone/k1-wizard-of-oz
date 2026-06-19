@@ -904,12 +904,11 @@
 
       <!-- Voice, Volume & Speed -->
       <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:0.6rem;flex-shrink:0;">
-
         <!-- Row 1: Voice selector -->
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-family:'Inter',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:#2c2c2c;white-space:nowrap;">Voice</span>
           <div style="flex:1;position:relative;">
-            <select id="voice-sel" onchange="changeVoice(this.value)" style="width:100%;font-family:'Inter',sans-serif;font-size:11px;border:1px solid #d0d0d0;background:#fff;color:#2c2c2c;padding:5px 28px 5px 8px;outline:none;-webkit-appearance:none;appearance:none;">
+            <select id="voice-sel" style="width:100%;font-family:'Inter',sans-serif;font-size:11px;border:1px solid #d0d0d0;background:#fff;color:#2c2c2c;padding:5px 28px 5px 8px;outline:none;-webkit-appearance:none;appearance:none;">
               <optgroup label="Female — US English">
                 <option value="en_US-amy-medium">Amy (female)</option>
                 <option value="en_US-kathleen-low">Kathleen (female)</option>
@@ -924,23 +923,21 @@
             <svg style="position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="#666" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
           </div>
         </div>
-
         <!-- Row 2: Volume + Speed -->
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;">
           <div style="display:flex;align-items:center;gap:6px;flex:1;">
             <span style="font-family:'Inter',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:#2c2c2c;white-space:nowrap;">Vol</span>
             <input type="range" min="0" max="100" value="70" id="vol-r" style="flex:1;height:2px;background:#d8d8d5;-webkit-appearance:none;appearance:none;outline:none;border-radius:0;">
             <span id="vol-v" style="font-family:'Inter',sans-serif;font-size:10px;font-weight:600;min-width:32px;text-align:right;color:#555;">70%</span>
           </div>
-          <div style="display:flex;align-items:center;gap:3px;flex-shrink:0;">
-            <span style="font-family:'Inter',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:#2c2c2c;white-space:nowrap;margin-right:2px;">Speed</span>
-            <button id="spd-slow"   onclick="setTTSSpeed('slow')"      style="font-family:'Inter',sans-serif;font-size:9px;padding:3px 6px;border:1px solid #d0d0d0;background:transparent;color:#666;cursor:pointer;">Slow</button>
-            <button id="spd-normal" onclick="setTTSSpeed('normal')"    style="font-family:'Inter',sans-serif;font-size:9px;padding:3px 6px;border:1px solid #d0d0d0;background:transparent;color:#666;cursor:pointer;">Normal</button>
-            <button id="spd-fast"   onclick="setTTSSpeed('fast')"      style="font-family:'Inter',sans-serif;font-size:9px;padding:3px 6px;border:1px solid #2c2c2c;background:#2c2c2c;color:#fff;cursor:pointer;">Fast</button>
-            <button id="spd-vfast"  onclick="setTTSSpeed('very_fast')" style="font-family:'Inter',sans-serif;font-size:9px;padding:3px 6px;border:1px solid #d0d0d0;background:transparent;color:#666;cursor:pointer;">V.Fast</button>
+          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+            <span style="font-family:'Inter',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:#2c2c2c;white-space:nowrap;">Speed</span>
+            <button id="spd-slow"     onclick="setTTSSpeed('slow')"      style="font-family:'Inter',sans-serif;font-size:9px;padding:3px 7px;border:1px solid #d0d0d0;background:transparent;color:#666;cursor:pointer;">Slow</button>
+            <button id="spd-normal"   onclick="setTTSSpeed('normal')"    style="font-family:'Inter',sans-serif;font-size:9px;padding:3px 7px;border:1px solid #d0d0d0;background:transparent;color:#666;cursor:pointer;">Normal</button>
+            <button id="spd-fast"     onclick="setTTSSpeed('fast')"      style="font-family:'Inter',sans-serif;font-size:9px;padding:3px 7px;border:1px solid #2c2c2c;background:#2c2c2c;color:#fff;cursor:pointer;">Fast</button>
+            <button id="spd-vfast"    onclick="setTTSSpeed('very_fast')" style="font-family:'Inter',sans-serif;font-size:9px;padding:3px 7px;border:1px solid #d0d0d0;background:transparent;color:#666;cursor:pointer;">V.Fast</button>
           </div>
         </div>
-
       </div>
 
       <div class="conv-panel">
@@ -1489,36 +1486,23 @@ async function pollStatus() {
 const volR = document.getElementById('vol-r');
 const volV = document.getElementById('vol-v');
 
-// ── Voice selection ───────────────────────────────────────────
-async function changeVoice(voice) {
-  try {
-    await fetch(FLASK + '/api/tts/voice', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({voice})
-    });
-    toast('Voice: ' + document.getElementById('voice-sel').options[document.getElementById('voice-sel').selectedIndex].text);
-  } catch(e) { toast('Voice change failed', 'err'); }
-}
-
 // ── TTS Speed ─────────────────────────────────────────────────
 async function setTTSSpeed(speed) {
-  const ids = {slow:'spd-slow', normal:'spd-normal', fast:'spd-fast', very_fast:'spd-vfast'};
-  Object.values(ids).forEach(id => {
+  const ids = ['spd-slow','spd-normal','spd-fast','spd-vfast'];
+  const map  = {'slow':'spd-slow','normal':'spd-normal','fast':'spd-fast','very_fast':'spd-vfast'};
+  ids.forEach(id => {
     const b = document.getElementById(id);
-    if (b) { b.style.background='transparent'; b.style.color='#666'; b.style.borderColor='#d0d0d0'; }
+    if (b) { b.style.background = 'transparent'; b.style.color = '#666'; b.style.borderColor = '#d0d0d0'; }
   });
-  const active = document.getElementById(ids[speed]);
-  if (active) { active.style.background='#2c2c2c'; active.style.color='#fff'; active.style.borderColor='#2c2c2c'; }
+  const active = document.getElementById(map[speed]);
+  if (active) { active.style.background = '#2c2c2c'; active.style.color = '#fff'; active.style.borderColor = '#2c2c2c'; }
   try {
     await fetch(FLASK + '/api/tts/settings', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({speed})
     });
-    const labels = {slow:'Slow',normal:'Normal',fast:'Fast',very_fast:'Very Fast'};
-    toast('Speed: ' + labels[speed]);
-  } catch(e) { toast('Speed change failed', 'err'); }
+  } catch(e) { console.warn('TTS speed update failed', e); }
 }
 
 volR.addEventListener('input', e => { volV.textContent = Math.round(e.target.value) + '%'; fetch(FLASK + '/api/volume', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({level: parseInt(e.target.value)}) }); });

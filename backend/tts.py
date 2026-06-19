@@ -30,8 +30,17 @@ PAPLAY_CMD = (
 )
 
 
+# Global speed — updated by /api/tts/settings
+_current_length_scale: float = 0.8
+
+def set_speed(length_scale: float) -> None:
+    global _current_length_scale
+    _current_length_scale = max(0.5, min(1.5, float(length_scale)))
+    print(f"[TTS] Speed set to length_scale={_current_length_scale}")
+
+
 def synthesize(text: str, voice_path=None,
-               length_scale: float = 0.8,
+               length_scale: float = None,
                treble: int = 15) -> str:
     """
     Convert text to a WAV file using Piper TTS with sox EQ.
@@ -50,6 +59,10 @@ def synthesize(text: str, voice_path=None,
         RuntimeError:      Piper synthesis failed
     """
     model = voice_path or cfg.PIPER_VOICE_PATH
+
+    # Use global speed if not explicitly passed
+    if length_scale is None:
+        length_scale = _current_length_scale
 
     if not os.path.exists(model):
         # Fall back to espeak-ng if Piper voice not found
