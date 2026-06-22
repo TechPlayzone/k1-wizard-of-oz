@@ -49,6 +49,18 @@ RPC error codes:
     501 = Server refused (already in that state)
     502 = State transition failed
 
+FIX LOG:
+    2026-06 — Issue F: _publish_button_event() was only called inside
+    _do_get_up(). If the operator confirmed 'walk' via the safety modal
+    (skipping GetUp entirely), button_event was never published. Move RPC
+    returned status=0 but the robot did not physically move.
+
+    Fix: _publish_button_event() is now called at the end of ALL paths
+    inside set_walk_mode() that result in current_mode = "walk":
+      - already in walk (mode sync path)
+      - ChangeMode Walk success (upright from Prep path)
+      - _do_get_up() success (lying-down path — was already calling it)
+
 Hillsborough College AI Innovation Center
 AI PREP4WORK Initiative — FIPSE Grant Program
 Deshjuana Bagley, Associate Dean, A.S. Degree Programs
@@ -96,12 +108,12 @@ class _RpcNode:
     """
 
     def __init__(self):
-        self._node       = None
-        self._client     = None
-        self._executor   = None
+        self._node        = None
+        self._client      = None
+        self._executor    = None
         self._spin_thread = None
-        self._lock       = threading.Lock()
-        self._ready      = False
+        self._lock        = threading.Lock()
+        self._ready       = False
 
     def start(self) -> bool:
         """Initialize ROS2 node and start background executor."""
@@ -215,11 +227,11 @@ def _subprocess_rpc(api_id: int, body: dict, timeout: int = 10) -> tuple:
             cmd, shell=True, capture_output=True,
             text=True, timeout=timeout, executable="/bin/bash"
         )
-        output        = result.stdout
-        status_match  = re.search(r"status=(\d+)", output)
-        body_match    = re.search(r"body='([^']*)'", output)
-        status        = int(status_match.group(1)) if status_match else -1
-        resp_body     = {}
+        output       = result.stdout
+        status_match = re.search(r"status=(\d+)", output)
+        body_match   = re.search(r"body='([^']*)'", output)
+        status       = int(status_match.group(1)) if status_match else -1
+        resp_body    = {}
         if body_match and body_match.group(1):
             try:
                 resp_body = json.loads(body_match.group(1))
@@ -339,37 +351,47 @@ class K1Robot:
         """
         Walk mode — robot ready for movement.
 
-        If already standing (mode 2): sync cache only.
-        If in Prep and upright: ChangeMode Walk directly.
-        If ChangeMode Walk fails: robot was lying down, use GetUp.
-        If in Damp: tell operator to Prep first.
+        FIX (Issue F): _publish_button_event() is now called on ALL paths
+        that result in walk mode, not just after GetUp. Without this, Move RPC
+        returns status=0 but the robot ignores the command entirely.
+
+        Paths:
+          1. Already in walk  → sync cache + publish button_event
+          2. In Prep, upright → ChangeMode Walk + publish button_event
+          3. In Prep, lying   → GetUp (publishes button_event internally)
+          4. In Damp          → reject, operator must Prep first
         """
         rpc_mode, _ = get_robot_mode()
 
+        # ── Path 1: already in walk ───────────────────────────
         if rpc_mode == MODE_WALK:
-            print("[K1] Already in walk mode")
+            print("[K1] Already in walk mode — publishing button_event to ensure Move works")
             self.current_mode = "walk"
+            self._publish_button_event()          # FIX: was missing on this path
             return True
 
+        # ── Path 2 / 3: in prep ──────────────────────────────
         if rpc_mode == MODE_PREP:
-            # Try direct ChangeMode Walk (works when upright)
+            # Try direct ChangeMode Walk (works when already upright)
             status, _ = rpc_call(API_CHANGE_MODE, {"mode": MODE_WALK})
             if status == 0:
                 time.sleep(2)
                 self.current_mode = "walk"
+                self._publish_button_event()      # FIX: was missing on this path
                 print("[K1] Mode → Walk")
                 return True
             # ChangeMode failed — robot likely lying down, need GetUp
             print("[K1] ChangeMode Walk failed — trying GetUp")
-            return self._do_get_up()
+            return self._do_get_up()              # button_event published inside
 
+        # ── Path 4: in damp ──────────────────────────────────
         if rpc_mode == MODE_DAMP:
             print("[K1] Cannot go to Walk from Damp — press Prep first")
             return False
 
-        # Unknown state — try GetUp
+        # ── Unknown state — try GetUp as last resort ──────────
         print(f"[K1] Unknown mode {rpc_mode} — attempting GetUp")
-        return self._do_get_up()
+        return self._do_get_up()                  # button_event published inside
 
     def _do_get_up(self) -> bool:
         """Stand up from lying position using api 2008. Wait 10s for completion."""
@@ -387,8 +409,15 @@ class K1Robot:
 
     def _publish_button_event(self) -> None:
         """
-        Publish {event:2, button:2} to /button_event after GetUp.
-        Without this, Move RPC returns status=0 but robot ignores it.
+        Publish {event:2, button:2} to /button_event.
+
+        Required before ANY Move command will be obeyed by the robot.
+        Without this, rpc_call(API_MOVE, ...) returns status=0 but the
+        robot does not move.
+
+        Previously this was only called inside _do_get_up(). It is now
+        called at the end of every path in set_walk_mode() that sets
+        current_mode = "walk".
         """
         try:
             import subprocess
@@ -399,7 +428,7 @@ class K1Robot:
                 "booster_interface/msg/ButtonEventMsg '{event: 2, button: 2}'"
             )
             subprocess.run(["bash", "-c", cmd], timeout=5, capture_output=True)
-            print("[K1] button_event published")
+            print("[K1] button_event published — Move commands now active")
         except Exception as e:
             print(f"[K1] button_event publish failed: {e}")
 
@@ -411,6 +440,7 @@ class K1Robot:
         if rpc_mode == MODE_WALK:
             print("[K1] Already standing")
             self.current_mode = "walk"
+            self._publish_button_event()          # ensure Move works after manual get_up call
             return True
         return self._do_get_up()
 
@@ -475,7 +505,7 @@ class K1Robot:
         """
         Execute a gesture.
             wave      → api 2005 WaveHand     body: {"hand_index": 0, "action": 0}
-            nod       → api 2004 RotateHead   sequence (no body params needed)
+            nod       → api 2004 RotateHead   sequence
             thumbs_up → api 2015 Handshake    body: {"hand_index": 0, "action": 0}
             bow       → api 2006 Bow          body: {}
         """
@@ -528,14 +558,6 @@ class K1Robot:
 
         whole_body=False → api 2016 upper body (safe from standing)
         whole_body=True  → api 2029 whole body (requires clear space)
-
-        Upper body DanceId:
-            0=NewYear  1=Nezha  2=TowardsFuture  3=Dabbing
-            4=Ultraman 5=Respect 6=Cheering 7=LuckyCat 1000=Stop
-
-        Whole body WholeBodyDanceId:
-            0=ArabicDance  1=MichaelDance1  2=MichaelDance2
-            3=MichaelDance3  4=MoonWalk  5=BoxingStyleKick  6=RoundhouseKick
         """
         api   = API_WHOLE_BODY_DANCE if whole_body else API_DANCE
         label = "whole_body" if whole_body else "upper_body"
